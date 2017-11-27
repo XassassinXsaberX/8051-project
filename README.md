@@ -1,11 +1,9 @@
 # 8051-project
-8051 MCU
 
 此repository主要是放上我的c code for 8051開發板(TE-8051A)  
 並學習如何利用AT89S52晶片來控制PDIUSBD12晶片(USB晶片)  
 <img src="https://raw.githubusercontent.com/XassassinXsaberX/8051-project/master/img/TE-8051A.jpg" height="500px" />  
 (上圖是TE-8051A，可參考此[賣場連結](http://goods.ruten.com.tw/item/show?11090706500841))  
-</br>
 </br>
 <img src="https://raw.githubusercontent.com/XassassinXsaberX/8051-project/master/img/PDIUSBD12.jpg" height="500px" />  
 (上圖中的紅色開發板為USB開發板，可參考此[賣場連結](http://goods.ruten.com.tw/item/show?21405202337357))
