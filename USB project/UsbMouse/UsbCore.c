@@ -101,10 +101,10 @@ code unsigned char ReportDescriptor[]=
 			//這是一個global item，選擇Usage page為按鍵（Button Page(0x09)）
 			0x05, 0x09, // USAGE_PAGE (Button)
 			
-			//這是一個local item，說明Usage的最小值為1。實際上是鼠標左鍵。
+			//這是一個local item，說明Usage的最小值為1。實際上是滑鼠左鍵。
 			0x19, 0x01, // USAGE_MINIMUM (Button 1)
 			
-			//這是一個local item，說明Usage的最大值為3。實際上是鼠標中鍵。
+			//這是一個local item，說明Usage的最大值為3。實際上是滑鼠中鍵。
 			0x29, 0x03, // USAGE_MAXIMUM (Button 3)
 			
 			//這是一個global item，說明返回的數據的邏輯值（就是我們返回的數據域的值啦）
