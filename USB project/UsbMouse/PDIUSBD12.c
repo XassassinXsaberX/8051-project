@@ -16,6 +16,7 @@ unsigned char D12ReadByte(void)	//對PSIUSBD12晶片輸入"讀取1 byte 資料"，並回傳讀
 {
 	//可參考PDIUSBD12晶片datasheet中的時序圖
 	unsigned char tmp;
+	//D12_DATA = 0xff;
 	D12_A0 = 0;			 //select the data phase
 	D12_RD = 0;
 	tmp = D12_DATA;
@@ -131,9 +132,6 @@ unsigned char D12WriteEndpointBuffer(unsigned char Endp, unsigned char Len, unsi
 	for(i=0;i<Len;i++)
 	{
 		D12WriteByte(Buf[i]);
-		//D12_WR = 0;
-		//D12_DATA = Buf[i];
-		//D12_WR = 1;
 
 		#ifdef DEBUG1
 			PrintHex(Buf[i]);		   //透過serial port印出這個byte的16進位表示法
@@ -146,7 +144,7 @@ unsigned char D12WriteEndpointBuffer(unsigned char Endp, unsigned char Len, unsi
 		if(Len%16!=0)
 			UARTPutChar('\n');
 	#endif
-	//D12AcknowledgeSetup();
+
 	D12ValidateBuffer(Endp);           //使該IN endpoint buffer有效
 	//D12_DATA = 0xff;				   //data port切換到輸入狀態
 	return Len;						   //回傳總共寫入幾個byte到buffer中

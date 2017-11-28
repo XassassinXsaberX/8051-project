@@ -115,7 +115,7 @@ void keypad(void)		    //4x4¡‰ΩL±Ω¥yµ{¶°
 	if(currentKey != previousKey)	   
 		previousKey = currentKey;
 	else
-		 pressKey = currentKey;
+		pressKey = currentKey;
 }
 
 void timer0_int(void) interrupt 1

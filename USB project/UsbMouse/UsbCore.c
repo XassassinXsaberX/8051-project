@@ -1,6 +1,7 @@
 #include "PDIUSBD12.h"
 #include "UsbCore.h"
 #include "UART.h"
+#include <INTRINS.h>
 
 idata unsigned char Buffer[16]; //讀取 endpoint 0用的緩衝區
 
@@ -318,56 +319,56 @@ code unsigned char LanguageId[4]=
 //字串為"歡迎參觀我的github:XassassinXsaberX" 
 //8bit的little endian格式 
 code unsigned char ManufacturerStringDescriptor[60]={
-60,         //該descriptor的長度為60 byte
-0x03,       //string descriptor的類型編碼為0x03
-0x61,0xb6,  //歡
-0xce,0x8f,  //迎 
-0xc3,0x53,  //參 
-0xc0,0x89,  //觀 
-0x11,0x62,  //我 
-0x84,0x76,  //的 
-0x67,0x00,  //g
-0x69,0x00,  //i
-0x74,0x00,  //t
-0x68,0x00,  //h
-0x75,0x00,  //u
-0x62,0x00,  //b
-0x3a,0x00,  //:
-0x58,0x00,  //X
-0x61,0x00,  //a
-0x73,0x00,  //s
-0x73,0x00,  //s
-0x61,0x00,  //a
-0x73,0x00,  //s
-0x73,0x00,  //s
-0x69,0x00,  //i
-0x6e,0x00,  //n
-0x58,0x00,  //X
-0x73,0x00,  //s
-0x61,0x00,  //a
-0x62,0x00,  //b
-0x65,0x00,  //e
-0x72,0x00,  //r
-0x58,0x00   //X
+	60,         //該descriptor的長度為60 byte
+	0x03,       //string descriptor的類型編碼為0x03
+	0x61,0xb6,  //歡
+	0xce,0x8f,  //迎 
+	0xc3,0x53,  //參 
+	0xc0,0x89,  //觀 
+	0x11,0x62,  //我 
+	0x84,0x76,  //的 
+	0x67,0x00,  //g
+	0x69,0x00,  //i
+	0x74,0x00,  //t
+	0x68,0x00,  //h
+	0x75,0x00,  //u
+	0x62,0x00,  //b
+	0x3a,0x00,  //:
+	0x58,0x00,  //X
+	0x61,0x00,  //a
+	0x73,0x00,  //s
+	0x73,0x00,  //s
+	0x61,0x00,  //a
+	0x73,0x00,  //s
+	0x73,0x00,  //s
+	0x69,0x00,  //i
+	0x6e,0x00,  //n
+	0x58,0x00,  //X
+	0x73,0x00,  //s
+	0x61,0x00,  //a
+	0x62,0x00,  //b
+	0x65,0x00,  //e
+	0x72,0x00,  //r
+	0x58,0x00   //X
 };
 /////////////////////////vendor string結束/////////////////////////////
 
 //字串"phisoner的滑鼠" 
 //8bit little endian格式
 code unsigned char ProductStringDescriptor[24]={
-24,         //該descriptor的長度為24 byte
-0x03,       //string descriptor的類型編碼為0x03
-0x70,0x00,  //p
-0x68,0x00,  //h
-0x69,0x00,  //i
-0x73,0x00,  //s
-0x6f,0x00,  //o
-0x6e,0x00,  //n
-0x65,0x00,  //e
-0x72,0x00,  //r
-0x84,0x76,  //的 
-0xd1,0x6e,  //滑 
-0x20,0x9f   //鼠 
+	24,         //該descriptor的長度為24 byte
+	0x03,       //string descriptor的類型編碼為0x03
+	0x70,0x00,  //p
+	0x68,0x00,  //h
+	0x69,0x00,  //i
+	0x73,0x00,  //s
+	0x6f,0x00,  //o
+	0x6e,0x00,  //n
+	0x65,0x00,  //e
+	0x72,0x00,  //r
+	0x84,0x76,  //的 
+	0xd1,0x6e,  //滑 
+	0x20,0x9f   //鼠 
 };
 ////////////////////////product string結束////////////////////////////
 
@@ -375,27 +376,33 @@ code unsigned char ProductStringDescriptor[24]={
 //字串為“2017-11-16”的Unicode編碼
 //8 bit的little endian格式
 code unsigned char SerialNumberStringDescriptor[22]={
-22,         //該descriptor的長度為22 byte
-0x03,       //string descriptor的類型編碼為0x03
-0x32, 0x00, //2
-0x30, 0x00, //0
-0x31, 0x00, //1
-0x37, 0x00, //7
-0x2d, 0x00, //-
-0x31, 0x00, //1
-0x31, 0x00, //1
-0x2d, 0x00, //-
-0x31, 0x00, //1
-0x36, 0x00  //6
+	22,         //該descriptor的長度為22 byte
+	0x03,       //string descriptor的類型編碼為0x03
+	0x32, 0x00, //2
+	0x30, 0x00, //0
+	0x31, 0x00, //1
+	0x37, 0x00, //7
+	0x2d, 0x00, //-
+	0x31, 0x00, //1
+	0x31, 0x00, //1
+	0x2d, 0x00, //-
+	0x31, 0x00, //1
+	0x36, 0x00  //6
 };
 //////////////////////device's serial number string結束/////////////////////////
 
 
-void DelayXms(unsigned int t)
+void DelayXms(unsigned int t)	 //delay t ms
 {
 	unsigned char i;
 	for(;t>0;t--)
 		for(i=0;i<120;i++);
+}
+
+void DelayXus(unsigned int t)	 //delay t us
+{
+	for(;t>0;t--)
+		_nop_();
 }
 
 void UsbDisconnect(void) //USB斷開連接 , interrupt處理函數
@@ -437,6 +444,7 @@ void UsbBusReset(void)   //bus reset , interrupt處理函數
 void UsbEp0Out(void)     //endpoint 0 OUT , interrupt處理函數 
 {
 	char status;
+	//char status;
 	int i;
 
 	//以下為standard device request的各個field
@@ -448,342 +456,333 @@ void UsbEp0Out(void)     //endpoint 0 OUT , interrupt處理函數
 
 	#ifdef DEBUG0
 		Prints("USB endpoint 0 OUT interrupt\n");
+		
 	#endif
 
 	status = D12ReadEndpointLastStatus(0);	    //"讀取endpoint 0 OUT最後ㄧ次transaction的狀態" 的command
 	                                            //該命令可清除interrupt register中，每一個interrupt對應到的interrupt flag
                                                 //將讀取到的 "最後ㄧ次transaction的狀態資料" 存到status變數中
-	//Prints("status=");          
-	//PrintHex(status);
-	//UARTPutChar('\n');
 
-	if(status & 0x01)	                            //如果最後ㄧ次transaction是成功傳送or成功接收
+	DelayXus(100);	                            //ㄧ定要dalay 100 us，否則會出錯，目前仍無解中...
+										 
+	if((status>>5) & 0x01)	                    //如果最後ㄧ次transaction為setup stage
 	{
-		if((status>>5) & 0x01)	                    //如果最後ㄧ次transaction為setup stage
+		for(i=0;i<16;i++)
+			Buffer[i] = 0;
+		D12ReadEndpointBuffer(0, 16, Buffer);	//讀取指定endpoint的buffer
+		D12AcknowledgeSetup();	                //Acknowledge Setup
+		D12ClearBuffer(0);			            //清空endpoint 0 OUT的buffer
+		
+		
+		//接下來決定USB standard device request的各個field
+		//收到Buffer[0] Buffer[1] Buffer[2] Buffer[3] Buffer[4] Buffer[5] Buffer[6] Buffer[7]
+		bmRequestType = Buffer[0];
+		bRequest = Buffer[1];
+		wValue = Buffer[3];	     	//採little endian格式，所以wValue為Buffer[3] Buffer[2]
+		wValue <<= 8;
+		wValue |= Buffer[2]; 
+		wIndex = Buffer[5];		    //採little endian格式，所以wIndex為Buffer[5] Buffer[4]
+		wIndex <<= 8;
+		wIndex |= Buffer[4]; 
+		wLength = Buffer[7];		//採little endian格式，所以wLength為Buffer[7] Buffer[6]
+		wLength <<= 8;
+		wLength |= Buffer[6];
+		
+		if((bmRequestType>>7)&0x01)	 //IN request
 		{
-			//Prints("Setup Packet\n");
-			for(i=0;i<16;i++)
-				Buffer[i] = 0;
-			D12ReadEndpointBuffer(0, 16, Buffer);	//讀取指定endpoint的buffer
-			D12AcknowledgeSetup();	                //Acknowledge Setup
-			D12ClearBuffer(0);			            //清空endpoint 0 OUT的buffer
-			
-			
-			//接下來決定USB standard device request的各個field
-			//收到Buffer[0] Buffer[1] Buffer[2] Buffer[3] Buffer[4] Buffer[5] Buffer[6] Buffer[7]
-			bmRequestType = Buffer[0];
-			bRequest = Buffer[1];
-			wValue = Buffer[3];	     	//採little endian格式，所以wValue為Buffer[3] Buffer[2]
-			wValue <<= 8;
-			wValue |= Buffer[2]; 
-			wIndex = Buffer[5];		    //採little endian格式，所以wIndex為Buffer[5] Buffer[4]
-			wIndex <<= 8;
-			wIndex |= Buffer[4]; 
-			wLength = Buffer[7];		//採little endian格式，所以wLength為Buffer[7] Buffer[6]
-			wLength <<= 8;
-			wLength |= Buffer[6];
-			
-			if((bmRequestType>>7)&0x01)	 //IN request
+			if(((bmRequestType>>5)&0x03) == 0)       //standard request
 			{
-				if(((bmRequestType>>5)&0x03) == 0)       //standard request
+				
+				#ifdef DEBUG0
+					Prints("USB standard IN request : ");
+				#endif
+				if(bRequest == GET_CONFIGURATION)
 				{
-					
 					#ifdef DEBUG0
-						Prints("USB standard IN request : ");
+						Prints("GET_CONFIGURATION\n");
 					#endif
-					if(bRequest == GET_CONFIGURATION)
+				}
+				else if(bRequest == GET_DESCRIPTOR)
+				{
+					#ifdef DEBUG0
+						Prints("GET_DESCRIPTOR---");
+					#endif
+					if(((wValue>>8)&0xff) == DEVICE_DESCRIPTOR)
 					{
 						#ifdef DEBUG0
-							Prints("GET_CONFIGURATION\n");
-						#endif
+							Prints("device descriptor\n");
+						#endif	
+						if(wLength > DeviceDescriptor[0])		//決定要送幾個byte
+							SendLength =  DeviceDescriptor[0];  
+						else
+							SendLength = wLength;
+
+						sendPtr = DeviceDescriptor;			    //決定要送哪些資料
+
+						UsbEp0SendData();                       //透過endpoint 0 IN送出資料
 					}
-					else if(bRequest == GET_DESCRIPTOR)
+					else if(((wValue>>8)&0xff) == CONFIGURATION_DESCRIPTOR)
 					{
 						#ifdef DEBUG0
-							Prints("GET_DESCRIPTOR---");
-						#endif
-						if(((wValue>>8)&0xff) == DEVICE_DESCRIPTOR)
+							Prints("configuration descriptor\n");
+						#endif	
+						if(wLength > sizeof(ConfigurationDescriptor) )		//決定要送幾個byte
+							SendLength =  sizeof(ConfigurationDescriptor);  
+						else
+							SendLength = wLength;
+
+						sendPtr = ConfigurationDescriptor;		         	//決定要送哪些資料
+
+						UsbEp0SendData();		                            //透過endpoint 0 IN送出資料
+
+					}
+					else if(((wValue>>8)&0xff) == STRING_DESCRIPTOR)
+					{
+						
+						#ifdef DEBUG0
+							Prints("string descriptor\n");
+						#endif	
+						
+						if((wValue & 0xff) == 0)
 						{
-							#ifdef DEBUG0
-								Prints("device descriptor\n");
-							#endif	
-							if(wLength > DeviceDescriptor[0])		//決定要送幾個byte
-								SendLength =  DeviceDescriptor[0];  
+							//Prints("Index 0\n");				   //決定要送幾個byte
+							if(wLength > sizeof(LanguageId) )
+								SendLength =  sizeof(LanguageId);  
+							else
+								SendLength = wLength;
+							
+							sendPtr = LanguageId;			       //決定要送哪些資料	
+						}
+						else if((wValue & 0xff) == 1)
+						{
+							//Prints("Index 1\n");
+							if(wLength > sizeof(ManufacturerStringDescriptor) )		 //決定要送幾個byte
+								SendLength =  sizeof(ManufacturerStringDescriptor);  
 							else
 								SendLength = wLength;
 	
-							sendPtr = DeviceDescriptor;			    //決定要送哪些資料
-
-							UsbEp0SendData();                       //透過endpoint 0 IN送出資料
+							sendPtr = ManufacturerStringDescriptor;			         //決定要送哪些資料
 						}
-						else if(((wValue>>8)&0xff) == CONFIGURATION_DESCRIPTOR)
+						else if((wValue & 0xff) == 2)
 						{
-							#ifdef DEBUG0
-								Prints("configuration descriptor\n");
-							#endif	
-							if(wLength > sizeof(ConfigurationDescriptor) )		//決定要送幾個byte
-								SendLength =  sizeof(ConfigurationDescriptor);  
+							//Prints("Index 2\n");
+							if(wLength > sizeof(ProductStringDescriptor) )		//決定要送幾個byte
+								SendLength =  sizeof(ProductStringDescriptor);  
 							else
 								SendLength = wLength;
 	
-							sendPtr = ConfigurationDescriptor;		         	//決定要送哪些資料
-
-							UsbEp0SendData();		                            //透過endpoint 0 IN送出資料
-
+							sendPtr = ProductStringDescriptor;		            //決定要送哪些資料
+						
 						}
-						else if(((wValue>>8)&0xff) == STRING_DESCRIPTOR)
+						else if((wValue & 0xff) == 3)
 						{
-							
-							#ifdef DEBUG0
-								Prints("string descriptor\n");
-							#endif	
-							
-							if((wValue & 0xff) == 0)
-							{
-								Prints("Index 0\n");				   //決定要送幾個byte
-								if(wLength > sizeof(LanguageId) )
-									SendLength =  sizeof(LanguageId);  
-								else
-									SendLength = wLength;
-								
-								sendPtr = LanguageId;			       //決定要送哪些資料	
-							}
-							else if((wValue & 0xff) == 1)
-							{
-								Prints("Index 1\n");
-								if(wLength > sizeof(ManufacturerStringDescriptor) )		 //決定要送幾個byte
-									SendLength =  sizeof(ManufacturerStringDescriptor);  
-								else
-									SendLength = wLength;
-		
-								sendPtr = ManufacturerStringDescriptor;			         //決定要送哪些資料
-							}
-							else if((wValue & 0xff) == 2)
-							{
-								Prints("Index 2\n");
-								if(wLength > sizeof(ProductStringDescriptor) )		//決定要送幾個byte
-									SendLength =  sizeof(ProductStringDescriptor);  
-								else
-									SendLength = wLength;
-		
-								sendPtr = ProductStringDescriptor;		            //決定要送哪些資料
-							
-							}
-							else if((wValue & 0xff) == 3)
-							{
-								Prints("Index 3\n");
-								if(wLength > sizeof(SerialNumberStringDescriptor) )		 //決定要送幾個byte
-									SendLength =  sizeof(SerialNumberStringDescriptor);  
-								else
-									SendLength = wLength;
-		
-								sendPtr = SerialNumberStringDescriptor;			         //決定要送哪些資料
-							}
-							else
-							{
-								Prints("Index error\n");
-							}								                          //透過endpoint 0 IN送出資料
-							UsbEp0SendData();
-						}
-						else if(((wValue>>8)&0xff) == INTERFACE_DESCRIPTOR)
-						{
-							#ifdef DEBUG0
-								Prints("interface descriptor\n");
-							#endif	
-						}
-						else if(((wValue>>8)&0xff) == ENDPOINT_DESCRIPTOR)
-						{
-							#ifdef DEBUG0
-								Prints("endpoint descriptor\n");
-							#endif	
-						}
-						else if(((wValue>>8)&0xff) == REPORT_DESCRIPTOR)
-						{
-							#ifdef DEBUG0
-								Prints("report descriptor\n");
-							#endif	
-							if(wLength > sizeof(ReportDescriptor) )
-									SendLength =  sizeof(ReportDescriptor);  //決定要送幾個byte
+							//Prints("Index 3\n");
+							if(wLength > sizeof(SerialNumberStringDescriptor) )		 //決定要送幾個byte
+								SendLength =  sizeof(SerialNumberStringDescriptor);  
 							else
 								SendLength = wLength;
 	
-							sendPtr = ReportDescriptor;			             //決定要送哪些資料
-							UsbEp0SendData();
+							sendPtr = SerialNumberStringDescriptor;			         //決定要送哪些資料
 						}
 						else
 						{
-							#ifdef DEBUG0
-								Prints("unknown descriptor\n");
-							#endif	
-						}
+							Prints("Index error\n");
+						}								                          //透過endpoint 0 IN送出資料
+						UsbEp0SendData();
 					}
-					else if(bRequest == GET_INTERFACE)
+					else if(((wValue>>8)&0xff) == INTERFACE_DESCRIPTOR)
 					{
 						#ifdef DEBUG0
-							Prints("GET_INTERFACE\n");
-						#endif
+							Prints("interface descriptor\n");
+						#endif	
 					}
-					else if(bRequest == GET_STATUS)
+					else if(((wValue>>8)&0xff) == ENDPOINT_DESCRIPTOR)
 					{
 						#ifdef DEBUG0
-							Prints("GET_STATUS\n");
-						#endif
+							Prints("endpoint descriptor\n");
+						#endif	
 					}
-					else if(bRequest == SYNCH_FRAME)
+					else if(((wValue>>8)&0xff) == REPORT_DESCRIPTOR)
 					{
 						#ifdef DEBUG0
-							Prints("SYNCH_FRAME\n");
-						#endif
+							Prints("report descriptor\n");
+						#endif	
+						if(wLength > sizeof(ReportDescriptor) )
+								SendLength =  sizeof(ReportDescriptor);  //決定要送幾個byte
+						else
+							SendLength = wLength;
+
+						sendPtr = ReportDescriptor;			             //決定要送哪些資料
+						UsbEp0SendData();
 					}
 					else
 					{
 						#ifdef DEBUG0
-							Prints("error:undefined standard IN request\n");
-						#endif
+							Prints("unknown descriptor\n");
+						#endif	
 					}
 				}
-				else if(((bmRequestType>>5)&0x03) == 1)  //class request
+				else if(bRequest == GET_INTERFACE)
 				{
 					#ifdef DEBUG0
-						Prints("USB class IN request : \n");
+						Prints("GET_INTERFACE\n");
 					#endif
 				}
-				else if(((bmRequestType>>5)&0x03) == 2)  //vendor request
+				else if(bRequest == GET_STATUS)
 				{
 					#ifdef DEBUG0
-						Prints("USB vendor IN request : \n");
+						Prints("GET_STATUS\n");
 					#endif
 				}
-				else				                   //reserved
+				else if(bRequest == SYNCH_FRAME)
 				{
 					#ifdef DEBUG0
-						Prints("error:undefined IN request\n");
+						Prints("SYNCH_FRAME\n");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG0
+						Prints("error:undefined standard IN request\n");
 					#endif
 				}
 			}
-			else  //OUT request
+			else if(((bmRequestType>>5)&0x03) == 1)  //class request
 			{
-				if(((bmRequestType>>5)&0x03) == 0)       //standard request
+				#ifdef DEBUG0
+					Prints("USB class IN request : \n");
+				#endif
+			}
+			else if(((bmRequestType>>5)&0x03) == 2)  //vendor request
+			{
+				#ifdef DEBUG0
+					Prints("USB vendor IN request : \n");
+				#endif
+			}
+			else				                     //reserved
+			{
+				#ifdef DEBUG0
+					Prints("error:undefined IN request\n");
+				#endif
+			}
+		}
+		else  //OUT request
+		{
+			if(((bmRequestType>>5)&0x03) == 0)       //standard request
+			{
+				#ifdef DEBUG0
+					Prints("USB standard OUT request : ");
+				#endif
+				if(bRequest == CLEAR_FEATURE)
 				{
 					#ifdef DEBUG0
-						Prints("USB standard OUT request : ");
+						Prints("CLEAR_FEATURE\n");
+					#endif	
+				}
+				else if(bRequest == SET_ADDRESS)
+				{
+					#ifdef DEBUG0
+						Prints("SET_ADDRESS\n");
 					#endif
-					if(bRequest == CLEAR_FEATURE)
-					{
-						#ifdef DEBUG0
-							Prints("CLEAR_FEATURE\n");
-						#endif	
-					}
-					else if(bRequest == SET_ADDRESS)
-					{
-						#ifdef DEBUG0
-							Prints("SET_ADDRESS\n");
-						#endif
-						//當接收到此standard request時，目的是要為此USB晶片設置host回傳給他的device address
-						D12WriteCommand(D12_SET_ADDRESS_ENABLE);
-						//此standard request中 wValue的低 7 bit值為device address
-						D12WriteByte(0x80 | (wValue & 0x7f));		//第7 bit設為1代表enable the function(function在USB中指的就像是設備)
+					//當接收到此standard request時，目的是要為此USB晶片設置host回傳給他的device address
+					D12WriteCommand(D12_SET_ADDRESS_ENABLE);
+					//此standard request中 wValue的低 7 bit值為device address
+					D12WriteByte(0x80 | (wValue & 0x7f));		//第7 bit設為1代表enable the function(function在USB中指的就像是設備)
 
-						//回傳ㄧ個data byte數目為0的data packet告知host已成功收到此standard OUT request
-						//回傳ㄧ個data byte數目為0的data packet時，代表control transfer中的data stage沒有data (也可以說data stage不存在)
-						SendLength = 0;
-						UsbEp0SendData();
-					}
-					else if(bRequest == SET_CONFIGURATION)
-					{
-						#ifdef DEBUG0
-							Prints("SET_CONFIGURATION\n");
-						#endif	
-					   
-					    //當收到此standard request時，目的是確定此configuration是否正確，若正確的話就enable all non-zero endpoint
-						//所以接下來要寫入Set Endpoint Enable command，目的是要enable或disable non-zero endpoint
-						D12WriteCommand(D12_SET_ENDPOINT_ENABLE);
-						ConfigValue = wValue & 0xff; //此standard request中 wValue的低byte值為configuration 
+					//回傳ㄧ個data byte數目為0的data packet告知host已成功收到此standard OUT request
+					//回傳ㄧ個data byte數目為0的data packet時，代表control transfer中的data stage沒有data (也可以說data stage不存在)
+					SendLength = 0;
+					UsbEp0SendData();
+				}
+				else if(bRequest == SET_CONFIGURATION)
+				{
+					#ifdef DEBUG0
+						Prints("SET_CONFIGURATION\n");
+					#endif	
+				   
+				    //當收到此standard request時，目的是確定此configuration是否正確，若正確的話就enable all non-zero endpoint
+					//所以接下來要寫入Set Endpoint Enable command，目的是要enable或disable non-zero endpoint
+					D12WriteCommand(D12_SET_ENDPOINT_ENABLE);
+					ConfigValue = wValue & 0xff; //此standard request中 wValue的低byte值為configuration 
 
-						//若此configuration的值非0時，代表為正確的configuration (可參考configuration descriptor中的bConfiguration，我們把configuration value設為1)
-						//此時才能enable non-zero endpoint，否則disable non-zero endpoint
-						if(ConfigValue)             
-							D12WriteByte(0x01);	  //enable non-zero endpoint
-						else
-							D12WriteByte(0x00);   //disable non-zero endpoint
-
-						//回傳ㄧ個data byte數目為0的data packet告知host已成功收到此standard OUT request
-						//回傳ㄧ個data byte數目為0的data packet時，代表control transfer中的data stage沒有data (也可以說data stage不存在)
-						SendLength = 0;
-						UsbEp0SendData();
-					}
-					else if(bRequest == SET_DESCRIPTOR)
-					{
-						#ifdef DEBUG0
-							Prints("SET_DESCRIPTOR\n");
-						#endif	
-					}
-					else if(bRequest == SET_FEATURE)
-					{
-						#ifdef DEBUG0
-							Prints("SET_FEATURE\n");
-						#endif	
-					}
-					else if(bRequest == SET_INTERFACE)
-					{
-						#ifdef DEBUG0
-							Prints("SET_INTERFACE\n");
-						#endif	
-					}
+					//若此configuration的值非0時，代表為正確的configuration (可參考configuration descriptor中的bConfiguration，我們把configuration value設為1)
+					//此時才能enable non-zero endpoint，否則disable non-zero endpoint
+					if(ConfigValue)             
+						D12WriteByte(0x01);	  //enable non-zero endpoint
 					else
-					{
-						#ifdef DEBUG0
-							Prints("error:undefined OUT request\n");
-						#endif
-					}
+						D12WriteByte(0x00);   //disable non-zero endpoint
+
+					//回傳ㄧ個data byte數目為0的data packet告知host已成功收到此standard OUT request
+					//回傳ㄧ個data byte數目為0的data packet時，代表control transfer中的data stage沒有data (也可以說data stage不存在)
+					SendLength = 0;
+					UsbEp0SendData();
 				}
-				else if(((bmRequestType>>5)&0x03) == 1)  //class request
+				else if(bRequest == SET_DESCRIPTOR)
 				{
 					#ifdef DEBUG0
-						Prints("USB class OUT request : ");
-					#endif
-					if(bRequest == SET_IDLE)
-					{
-						Prints("SET_IDLE\n");
-						//回傳ㄧ個data byte數目為0的data packet告知host已成功收到此standard OUT request
-						//回傳ㄧ個data byte數目為0的data packet時，代表control transfer中的data stage沒有data (也可以說data stage不存在)
-						SendLength = 0;
-						UsbEp0SendData();
-					}
-					else
-					{
-						Prints("unknown request\n");
-					}
+						Prints("SET_DESCRIPTOR\n");
+					#endif	
 				}
-				else if(((bmRequestType>>5)&0x03) == 2)  //vendor request
+				else if(bRequest == SET_FEATURE)
 				{
 					#ifdef DEBUG0
-						Prints("USB vendor OUT request : \n");
-					#endif
+						Prints("SET_FEATURE\n");
+					#endif	
 				}
-				else				                   //reserved
+				else if(bRequest == SET_INTERFACE)
+				{
+					#ifdef DEBUG0
+						Prints("SET_INTERFACE\n");
+					#endif	
+				}
+				else
 				{
 					#ifdef DEBUG0
 						Prints("error:undefined OUT request\n");
 					#endif
-				}	
+				}
 			}
-			
+			else if(((bmRequestType>>5)&0x03) == 1)  //class request
+			{
+				#ifdef DEBUG0
+					Prints("USB class OUT request : ");
+				#endif
+				if(bRequest == SET_IDLE)
+				{	
+					#ifdef DUBUG0
+						Prints("SET_IDLE\n");
+					#endif
+					//回傳ㄧ個data byte數目為0的data packet告知host已成功收到此standard OUT request
+					//回傳ㄧ個data byte數目為0的data packet時，代表control transfer中的data stage沒有data (也可以說data stage不存在)
+					SendLength = 0;
+					UsbEp0SendData();
+				}
+				else
+				{
+					Prints("unknown request\n");
+				}
+			}
+			else if(((bmRequestType>>5)&0x03) == 2)  //vendor request
+			{
+				#ifdef DEBUG0
+					Prints("USB vendor OUT request : \n");
+				#endif
+			}
+			else				                   //reserved
+			{
+				#ifdef DEBUG0
+					Prints("error:undefined OUT request\n");
+				#endif
+			}	
 		}
-		else
-		{
-			//Prints("non SETUP packet\n");
-			D12ReadEndpointBuffer(0, 16, Buffer);	//讀取指定endpoint的buffer
-			D12ClearBuffer(0);			            //清空endpoint 0 OUT buffer
-		}
+		
 	}
 	else
 	{
-		Prints("接收失敗--");
-		//Prints("status=");          
-		//PrintHex(status);
-		//UARTPutChar('\n');
+		D12ReadEndpointBuffer(0, 16, Buffer);	//讀取指定endpoint的buffer
+		D12ClearBuffer(0);			            //清空endpoint 0 OUT buffer
 	}
+	
 		
 	
 		
@@ -817,23 +816,15 @@ void UsbEp0In(void)      //endpoint 0 IN , interrupt處理函數
 	
 	status = D12ReadEndpointLastStatus(1); //讀取endpoint 0 IN中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
 
-	Prints("status=");         
-	PrintHex(status);
-	UARTPutChar('\n');
 
-	if(status & 0x01)     //如果endpoint 0 IN 成功傳送資料給host
+	DelayXus(100); //若不delay 0.1 ms就會出現錯誤，目前仍無法解釋...
+
+
+	if(SendLength >= DeviceDescriptor[7])    //SendLength代表上次傳輸時，還需要傳送的資料長度
 	{
-		if(SendLength >= DeviceDescriptor[7])    //SendLength代表上次傳輸時，還需要傳送的資料長度
-		{
-			sendPtr += DeviceDescriptor[7];		 //可以串送下ㄧ組資料了
-			SendLength -= DeviceDescriptor[7];   //SendLength現在代表目前還需要傳送的資料長度，因為上次成功的傳送資料，所以需要傳送資料的長度變少了
-			UsbEp0SendData();					 //透過endpoint 0 IN 來送資料
-		}
-	}
-	else	              //若endpoint 0 IN 傳送資料給host時，傳送失敗
-	{
-		Prints("傳送失敗，重新傳送\n");
-		UsbEp0SendData(); //重新傳送資料
+		sendPtr += DeviceDescriptor[7];		 //可以串送下ㄧ組資料了
+		SendLength -= DeviceDescriptor[7];   //SendLength現在代表目前還需要傳送的資料長度，因為上次成功的傳送資料，所以需要傳送資料的長度變少了
+		UsbEp0SendData();					 //透過endpoint 0 IN 來送資料
 	}
 	
 } 
@@ -847,10 +838,12 @@ void UsbEp1Out(void)     //endpoint 1 OUT , interrupt處理函數
 
 void UsbEp1In(void)      //endpoint 1 IN , interrupt處理函數 
 {
+	unsigned char status;
 	#ifdef DEBUG0
 		Prints("USB endpoint 1 IN interrupt\n");
 	#endif
-	D12ReadEndpointLastStatus(3);
+	status = D12ReadEndpointLastStatus(3);
+
 	Ep1InIsBusy = 0;
 } 
 

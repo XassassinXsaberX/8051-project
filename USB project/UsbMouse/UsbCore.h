@@ -34,12 +34,13 @@ void UsbEp2Out(void);     //endpoint 2 OUT , interrupt處理函數
 void UsbEp2In(void);      //endpoint 2 IN , interrupt處理函數 
 
 void DelayXms(unsigned int t); //delay t ms
-void UsbEp0SendData(void);//將sendPtr指向的資料送出
+void DelayXus(unsigned int t); //delay t us
+void UsbEp0SendData(void);     //將sendPtr指向的資料送出
 
 extern unsigned char ConfigValue;  //目前的confuguration value
 extern bit Ep1InIsBusy;            //endpoint 1 是否忙碌 
 
 #endif
 
-#define DEBUG0
+//#define DEBUG0
 

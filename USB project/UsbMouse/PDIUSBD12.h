@@ -42,7 +42,7 @@ void D12WriteByte(unsigned char);	           //對PSIUSBD12晶片輸入"寫入1 byte 資
 void DelayXms(unsigned int t);                 //延遲 t ms
 unsigned int D12ReadID(void);		           //回傳該晶片的id
 unsigned char D12ReadEndpointBuffer(unsigned char, unsigned char, unsigned char*);      //讀取指定endpoint的buffer
-unsigned char D12WriteEndpointBuffer(unsigned char, unsigned char, unsigned char*);   //將資料寫入指定endpoint的buffer
+unsigned char D12WriteEndpointBuffer(unsigned char, unsigned char, unsigned char*);     //將資料寫入指定endpoint的buffer
 void D12ClearBuffer(unsigned char);                                                     //清空特定endpoint的buffer
 void D12ValidateBuffer(unsigned char);                                                  //使IN endpoint buffer有效
 unsigned char D12ReadEndpointLastStatus(unsigned char);	                                //讀取指定endpoint中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
@@ -50,6 +50,6 @@ void D12AcknowledgeSetup(void);			                                              
 void D12SetAddress(unsigned char Addr);
 //void D12SetEndpointEnable(unsigned char Enable);
 
-#define DEBUG1
+//#define DEBUG1
 
 

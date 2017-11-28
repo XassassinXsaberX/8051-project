@@ -12,16 +12,16 @@ PC使用RS232的serial port來接收資料
 
 code char headTable[][74] = {
 "**********************************************************\r\n", 
-"******              江承翰的USB鼠標 \r\n", 
-"******                 AT89S52 CPU \r\n", 
-"******               建立日期：",__DATE__,"  \r\n", 
-"******               建立時間：",__TIME__,"  \n", 
-"******               作者：phisoner          \n", 
-"******               歡迎訪問我的github \n", 
-"******        https://github.com/XassassinXsaberX \n",  
-"******               請按K1-K16分別進行測試 \n", 
-"******     K1:光標左移K2:光標右移K3:光標上移K4:光標下移  \n", 
-"******     K5:滾輪下滾K6:滾輪上滾K7:鼠標左鍵K8:鼠標右鍵  \n", 
+"******             江承翰的USB鼠標 \r\n", 
+"******             AT89S52 CPU \r\n", 
+"******               建立日期：",__DATE__,"\r\n", 
+"******               建立時間：",__TIME__,"\r\n", 
+"******               作者：phisoner\n", 
+"******               歡迎訪問我的github\n", 
+"******        https://github.com/XassassinXsaberX\n",  
+"******               請按K0-K15分別進行測試\n", 
+"******  K4、K5:游標右移  K6、K7:遊標左移  K9、K10:遊標下移\n", 
+"******  K13、K14:遊標上移  K8、K11:滾輪下滾  K12、K15:滾輪上滾\n", 
 "**********************************************************\n", 
 }; 
 
@@ -61,13 +61,13 @@ void SendReport(void)
 		Buf[2] = -1;
 
 	if((KEY>>12) & 0X01)       //如果鍵盤12被按下，則代表滾輪上滾 (即滾輪值為正值)
-		Buf[3] = 10;
+		Buf[3] = 1;
 	else if((KEY>>15) & 0X01)  //如果鍵盤15被按下，則代表滾輪上滾 (即滾輪值為正值)
-		Buf[3] = 10;
+		Buf[3] = 1;
 	else if((KEY>>8) & 0X01)   //如果鍵盤8被按下，則代表滾輪下滾 (即滾輪值為負值)
-		Buf[3] = -10;
+		Buf[3] = -1;
 	else if((KEY>>11) & 0X01)  //如果鍵盤11被按下，則代表滾輪下滾 (即滾輪值為負值)
-		Buf[3] = -10;
+		Buf[3] = -1;
 	
 	D12WriteEndpointBuffer(3,4,Buf);
 }
@@ -78,7 +78,7 @@ void main()
 	
 	unsigned int id;
 	char led;
-	unsigned interruptSource;
+	volatile unsigned interruptSource;
 	int i;
 	InitUART();
 	InitKeyboard();
@@ -97,7 +97,8 @@ void main()
 	UsbConnect();
 
 	ConfigValue = 0;
-
+   	
+	
 	while(1)
 	{	
 		P2 = 0x00;
@@ -120,12 +121,14 @@ void main()
 			{
 				//PrintShortIntHex(ConfigValue);
 				if(Ep1InIsBusy == 0)
-						SendReport();
+					SendReport();
 			}
 				
 			//while(pressKey != NOPRESS);
 
 		}
+		
+		
 		if(D12_INT == 0)   //如果PDIUSBD12晶片發生interrupt
 		{
 			D12WriteCommand(READ_INTERRUPT_REGISTER);	//寫入 "讀取interrupt register command"
@@ -152,6 +155,7 @@ void main()
 		}
 		
 	}
+	
 }
 
 
