@@ -88,7 +88,7 @@ code unsigned char ReportDescriptor[]=
 	
 	//這是一個main item(bType為0)，開集合，後面跟的數據0x01表示
 	//該collection是一個application collection。它的性質在前面由Usage page和Usage定義為
-	//普通桌面用的鼠標。
+	//普通桌面用的滑鼠。
 	0xa1, 0x01, // COLLECTION (Application)
 	
 		//這是一個local item。說明Usage為pointer collection
@@ -155,7 +155,7 @@ code unsigned char ReportDescriptor[]=
 			
 			//下面兩個為global item，說明返回的邏輯最小和最大值。
 			//因為鼠標指針移動時，通常是用相對值來表示的，
-			//相對值的意思就是，當指針移動時，只發送移動量。
+			//相對值的意思就是，當游標移動時，只發送移動量。
 			//往右移動時，X值為正；往下移動時，Y值為正。
 			//對於滾輪，當滾輪往上滾時，值為正。
 			0x15, 0x81, // LOGICAL_MINIMUM (-127)
@@ -182,7 +182,7 @@ code unsigned char ReportDescriptor[]=
 //第一個byte的低3 bit用來表示按鍵是否按下的，高5 bit為constant 0，無用。
 //第二個byte表示X軸的改變量，第三個byte表示Y軸的改變量，第四個byte表示
 //滾輪的改變量。我們在interrupt endpoint 1 中應該要按照上面的格式返回實際的
-//鼠標數據。
+//滑鼠數據。
 ///////////////////////////report descriptor完畢////////////////////////////
 
 
@@ -233,7 +233,7 @@ code unsigned char ConfigurationDescriptor[9+9+9+7]=
 	//bAlternateSetting字段。該interface的備用編號，為0。
 	0x00,
 	
-	//bNumEndpoints字段。非0 endpoint的數目。由於USB鼠標只需要一個
+	//bNumEndpoints字段。非0 endpoint的數目。由於USB滑鼠只需要一個
 	//interrupt IN endpoint，因此該值為1。
 	0x01,
 	
@@ -243,7 +243,7 @@ code unsigned char ConfigurationDescriptor[9+9+9+7]=
 	
 	//bInterfaceSubClass字段。該interface所使用的subclass。在HID1.1協議中，
 	//只規定了一種subclass：支持BIOS引導啟動的subclass。
-	//USB鍵盤、鼠標屬於該subclass，subclass代碼為0x01。
+	//USB鍵盤、滑鼠屬於該subclass，subclass代碼為0x01。
 	0x01,
 	
 	//bInterfaceProtocol字段。如果subclass為支持引導啟動的subclass，

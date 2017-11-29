@@ -39,7 +39,7 @@ void SendReport(void)
 	
 	//Buf[0]有8個bit
 	//bit 0:為左Ctrl鍵、bit 1:為左Shift鍵、bit 2:為左Alt鍵、bit 3:為左GUI(即Window鍵)
-	//bit 4:為右Ctrl鍵、bit 1:為右Shift鍵、bit 2:為右Alt鍵、bit 3:為右GUI(即Window鍵)
+	//bit 4:為右Ctrl鍵、bit 5:為右Shift鍵、bit 6:為右Alt鍵、bit 7:為右GUI(即Window鍵)
 	if(KEY & 0x01)			  //如果鍵盤0被按下，則代表按下左Ctrl鍵
 		Buf[0] |= 1<<0;	      
 	if((KEY>>1) & 0x01)       //如果鍵盤1被按下，則代表按下左Shift鍵

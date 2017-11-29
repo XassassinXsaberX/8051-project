@@ -21,11 +21,6 @@ code char headTable[][74] = {
 "**********************************************************\n", 
 }; 
 
-code char led_word[] = {0x3f,0x06,0x5b,0x4f,
-                        0x66,0x6d,0x7d,0x07,
-						0x7f,0x6f,0x77,0x7c,
-						0x39,0x5e,0x79,0x71};
-
 
 void SendReport(void)
 {
@@ -80,10 +75,10 @@ void main()
 	unsigned int id;
 	volatile unsigned interruptSource;
 	int i;
-	InitUART();
-	InitKeyboard();
+	InitUART();			   //初始化serial port設定
+	InitKeyboard();	       //初始化4x4鍵盤設定
 	
-
+   	//透過serial port印出晶片ID
 	for(i=0;i<sizeof(headTable)/74;i++)
 	{
 		Prints(headTable[i]);
@@ -96,7 +91,7 @@ void main()
 	UsbDisconnect();
 	UsbConnect();
 
-	ConfigValue = 0;
+	ConfigValue = 0;			  //設定ㄧ開始的configuration value
    	
 	
 	while(1)

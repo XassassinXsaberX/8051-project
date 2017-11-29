@@ -50,7 +50,7 @@ code unsigned char DeviceDescriptor[0x12]=  //device descriptor為18byte
 	0x02,
 	0x00,
 	
-	//bcdDevice字段。我們這個USB滑鼠鼠標剛開始做，就叫它1.0版吧，即0x0100。
+	//bcdDevice字段。我們這個USB滑鼠鍵盤剛開始做，就叫它1.0版吧，即0x0100。
 	//little endian模式，低byte在先。
 	0x00,
 	0x01,
@@ -274,20 +274,20 @@ code unsigned char ConfigurationDescriptor[9+9+9+7]=
 	0x00,
 	
 	//bNumEndpoints字段。non-zero endpoint的數目。該USB鍵盤需要二個interrupt endpoint
-	//(一個IN、一個OUT)，因此該值為2。
+	//(一個IN、一個OUT)，因此該值為2 (先只使用IN endpoint，所以只有一個endpoint)。
 	0x01,
 	
-	//bInterfaceClass字段。該interface所使用的class。USB鼠標是HID class，
+	//bInterfaceClass字段。該interface所使用的class。USB鍵盤是HID class，
 	//HID class的編碼為0x03。
 	0x03,
 	
 	//bInterfaceSubClass字段。該interface所使用的subclass。在HID1.1協議中，
 	//只規定了一種subclass：支持BIOS引導啟動的subclass。
-	//USB鍵盤、鼠標屬於該subclass，subclass代碼為0x01。
+	//USB鍵盤、滑鼠屬於該subclass，subclass代碼為0x01。
 	0x01,
 	
 	//bInterfaceProtocol字段。如果subclass為支持引導啟動的subclass，
-	//則協議可選擇鼠標和鍵盤。鍵盤代碼為0x01，鼠標代碼為0x02。
+	//則協議可選擇滑鼠和鍵盤。鍵盤代碼為0x01，滑鼠代碼為0x02。
 	0x01,
 	
 	//iConfiguration字段。該interface的string index。這裡沒有，為0。
@@ -317,7 +317,7 @@ code unsigned char ConfigurationDescriptor[9+9+9+7]=
 	sizeof(ReportDescriptor)&0xFF,
 	(sizeof(ReportDescriptor)>>8)&0xFF,
 	
-	/**********************endpoint descriptor***********************/
+	/**********************IN endpoint descriptor***********************/
 	//bLength字段。endpoint descriptor長度為7byte。
 	0x07,
 	
@@ -339,6 +339,31 @@ code unsigned char ConfigurationDescriptor[9+9+9+7]=
 	
 	//bInterval字段。endpoint polling的時間，我們設置為10個frame時間，即10ms。
 	0x0A
+
+	/**********************OUT endpoint descriptor***********************/
+	/*
+	//bLength字段。endpoint descriptor長度為7 byte。
+	0x07,
+	
+	//bDescriptorType字段。endpoint descriptor編號為0x05。
+	0x05,
+	
+	//bEndpointAddress字段。endpoint的地址。我們使用D12的OUT endpoint 1。
+	//D7位表示數據方向，OUT endpoint D7為0。所以OUT endpoint 1 的地址為0x01。
+	0x01,
+	
+	//bmAttributes字段。D1~D0為endpoint傳輸類型選擇。
+	//該endpoint為interrupt endpoint。interrupt endpoint的編號為3。其它bit保留為0。
+	0x03,
+	
+	//wMaxPacketSize字段。該endpoint的最大packet長。endpoint 1 的最大packet長為16 byte。
+	//注意低byte在先。
+	0x10,
+	0x00,
+	
+	//bInterval字段。endpoint polling的時間，我們設置為10個frame時間，即10ms。
+	0x0A
+	*/
 };
 ////////////////////////配置描述符集合完畢//////////////////////////
 
