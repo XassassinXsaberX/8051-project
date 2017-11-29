@@ -45,9 +45,9 @@ code unsigned char DeviceDescriptor[0x12]=  //device descriptor為18byte
 	0x88,
 	0x88,
 	
-	//idProduct字段。Product ID，由於是第一個實驗，我們這裡取0x0001。
+	//idProduct字段。Product ID，由於是第二個實驗，我們這裡取0x0002。
 	//注意little endian模式，低byte應該在前。
-	0x01,
+	0x02,
 	0x00,
 	
 	//bcdDevice字段。我們這個USB滑鼠鼠標剛開始做，就叫它1.0版吧，即0x0100。
@@ -78,111 +78,151 @@ code unsigned char ReportDescriptor[]=
 	//每行開始的第一個byte為該item的prefix，prefix的格式為：
 	//D7~D4：bTag。D3~D2：bType；D1~D0：bSize。以下分別對每個item註釋。
 	
-	//這是一個global item(bType為1)，選擇Usage page為普通桌面Generic Desktop Page(0x01)
-	//後面跟 1 byte的數據（bSize為1），後面的byte數就不註釋了，
+	//這是一個 global item (bType為1)，將usage page選擇為普通桌面Generic Desktop Page(0x01)
+	//後面跟一個byte數據 (bSize為1)，後面的byte數目就不註釋了，
 	//自己根據bSize來判斷。
 	0x05, 0x01, // USAGE_PAGE (Generic Desktop)
 	
-	//這是一個local item(bType為2)，說明接下來的application collection用途用於鼠標
-	0x09, 0x02, // USAGE (Mouse)
+	//這是一個 local item (bType為2)，說明接下來的集合用途用於鍵盤
+	0x09, 0x06, // USAGE (Keyboard)
 	
-	//這是一個main item(bType為0)，開集合，後面跟的數據0x01表示
-	//該collection是一個application collection。它的性質在前面由Usage page和Usage定義為
-	//普通桌面用的鼠標。
+	//這是一個 main item (bType為0)，開集合，後面跟的數據0x01表示
+	//該collection是一個application collection。它的性質在前面由usage page和usage定義為
+	//普通桌面用的鍵盤。
 	0xa1, 0x01, // COLLECTION (Application)
 	
-		//這是一個local item。說明Usage為pointer collection
-		0x09, 0x01, // USAGE (Pointer)
+		//這是一個 global item，選擇 usage page為鍵盤（Keyboard/Keypad(0x07)）
+		0x05, 0x07, // USAGE_PAGE (Keyboard/Keypad)
 		
-		//這是一個main item，開集合，後面跟的數據0x00表示該collection是一個
-		//physical collection，Usage由前面的local item定義為pointer collection。
-		0xa1, 0x00, // COLLECTION (Physical)
+		//這是一個 local item，說明usage的最小值為0xe0。實際上是鍵盤左Ctrl鍵。
+		//具體的usage value可在HID usage table中查看。
+		0x19, 0xe0, // USAGE_MINIMUM (Keyboard LeftControl)
 		
-			//這是一個global item，選擇Usage page為按鍵（Button Page(0x09)）
-			0x05, 0x09, // USAGE_PAGE (Button)
-			
-			//這是一個local item，說明Usage的最小值為1。實際上是滑鼠左鍵。
-			0x19, 0x01, // USAGE_MINIMUM (Button 1)
-			
-			//這是一個local item，說明Usage的最大值為3。實際上是滑鼠中鍵。
-			0x29, 0x03, // USAGE_MAXIMUM (Button 3)
-			
-			//這是一個global item，說明返回的數據的邏輯值（就是我們返回的數據域的值啦）
-			//最小為0。因為我們這裡用Bit來表示一個數據域，因此最小為0，最大為1。
-			0x15, 0x00, // LOGICAL_MINIMUM (0)
-			
-			//這是一個global item，說明邏輯值最大為1。
-			0x25, 0x01, // LOGICAL_MAXIMUM (1)
-			
-			//這是一個global item，說明數據域的數量為三個。
-			0x95, 0x03, // REPORT_COUNT (3)
-			
-			//這是一個global item，說明每個數據域的長度為1個bit。
-			0x75, 0x01, // REPORT_SIZE (1)
-			
-			//這是一個main item，說明有3個長度為1bit的數據域（數量和長度
-			//由前面的兩個global item所定義）用來做為輸入，
-			//屬性為：Data,Var,Abs。Data表示這些數據可以變動，Var表示
-			//這些數據域是獨立的，每個域表示一個意思。Abs表示絕對值。
-			//這樣定義的結果就是，第一個數據域bit0表示按鍵1（左鍵）是否按下，
-			//第二個數據域bit1表示按鍵2（右鍵）是否按下，第三個數據域bit2表示
-			//按鍵3（中鍵）是否按下。
-			0x81, 0x02, // INPUT (Data,Var,Abs)
-			
-			//這是一個global item，說明數據域數量為1個
-			0x95, 0x01, // REPORT_COUNT (1)
-			
-			//這是一個global item，說明每個數據域的長度為5bit。
-			0x75, 0x05, // REPORT_SIZE (5)
-			
-			//這是一個main item，輸入用，由前面兩個global item可知，長度為5bit，
-			//數量為1個。它的屬性為constant（即返回的數據一直是0）。
-			//這個只是為了湊齊一個byte（前面用了3個bit）而填充的一些數據
-			//而已，所以它是沒有實際用途的。
-			0x81, 0x03, // INPUT (Cnst,Var,Abs)
-			
-			//這是一個global item，選擇Usage page為普通桌面Generic Desktop Page(0x01)
-			0x05, 0x01, // USAGE_PAGE (Generic Desktop)
-			
-			//這是一個local item，說明Usage為X軸
-			0x09, 0x30, // USAGE (X)
-			
-			//這是一個local item，說明Usage為Y軸
-			0x09, 0x31, // USAGE (Y)
-			
-			//這是一個local item，說明Usage為滾輪
-			0x09, 0x38, // USAGE (Wheel)
-			
-			//下面兩個為global item，說明返回的邏輯最小和最大值。
-			//因為鼠標指針移動時，通常是用相對值來表示的，
-			//相對值的意思就是，當指針移動時，只發送移動量。
-			//往右移動時，X值為正；往下移動時，Y值為正。
-			//對於滾輪，當滾輪往上滾時，值為正。
-			0x15, 0x81, // LOGICAL_MINIMUM (-127)
-			0x25, 0x7f, // LOGICAL_MAXIMUM (127)
-			
-			//這是一個global item，說明數據域的長度為8bit。
-			0x75, 0x08, // REPORT_SIZE (8)
-			
-			//這是一個global item，說明數據域的個數為3個。
-			0x95, 0x03, // REPORT_COUNT (3)
-			
-			//這是一個main item。它說明這三個8bit的數據域是輸入用的，
-			//屬性為：Data,Var,Rel。Data說明數據是可以變的，Var說明
-			//這些數據域是獨立的，即第一個8bit表示X軸，第二個8bit表示
-			//Y軸，第三個8bit表示滾輪。Rel表示這些值是相對值。
-			0x81, 0x06, // INPUT (Data,Var,Rel)
-			
-		//下面這兩個main item用來關閉前面的collection用。
-		//我們開了兩個collection，所以要關兩次。bSize為0，所以後面沒數據。
-		0xc0, // END_COLLECTION
+		//這是一個 local item，說明usage的最大值為0xe7。實際上是鍵盤右GUI鍵。
+		0x29, 0xe7, // USAGE_MAXIMUM (Keyboard Right GUI)
+		
+		//這是一個 global item，說明返回的數據的邏輯值（就是我們返回的data field的值）
+		//最小為0。因為我們這裡用Bit來表示一個data field，因此最小為0，最大為1。
+		0x15, 0x00, // LOGICAL_MINIMUM (0)
+		
+		//這是一個 glabal item，說明邏輯值最大為1。
+		0x25, 0x01, // LOGICAL_MAXIMUM (1)
+		
+		//這是一個 global item，說明data field的數量為八個。
+		0x95, 0x08, // REPORT_COUNT (8)
+		
+		//這是一個 global item，說明每個data field的長度為1個bit。
+		0x75, 0x01, // REPORT_SIZE (1)
+		
+		//這是一個 main item，說明有8個長度為1bit的data field（數量和長度由前面的兩個golbal item所定義）用來做為輸入，
+		//屬性為：Data,Var,Abs。Data表示這些數據可以變動
+		//Var表示這些數據域是獨立的，每個域表示一個意思。
+		//Abs表示絕對值。
+		//這樣定義的結果就是，當某個域的值為1時，就表示對應的鍵按下。
+		//bit0就對應著Usage最小值0xe0，bit7對應著Usage最大值0xe7。
+		0x81, 0x02, // INPUT (Data,Var,Abs)
+		
+		//這是一個 global item，說明data field數量為1個
+		0x95, 0x01, // REPORT_COUNT (1)
+		
+		//這是一個 global item，說明每個data field的長度為8bit。
+		0x75, 0x08, // REPORT_SIZE (8)
+		
+		//這是一個 main item，輸入用，由前面兩個main item可知，長度為8bit，
+		//數量為1個。它的屬性為constant（即返回的數據一直是0）。
+		//該byte是保留byte（保留給OEM使用）。
+		0x81, 0x03, // INPUT (Cnst,Var,Abs)
+		
+		//這是一個 global item。定義bit field數量為6個。
+		0x95, 0x06, // REPORT_COUNT (6)
+		
+		//這是一個 global item。定義每個bit field長度為8bit。
+		//其實這裡這個item不要也是可以的，因為在前面已經有一個定義
+		//長度為8bit的global item了。
+		0x75, 0x08, // REPORT_SIZE (8)
+		
+		//這是一個 global item，定義邏輯最小值為0。
+		//同上，這裡這個global item也是可以不要的，因為前面已經有一個
+		//定義邏輯最小值為0的global item了。
+		0x15, 0x00, // LOGICAL_MINIMUM (0)
+		
+		//這是一個 global item，定義邏輯最大值為255。
+		0x25, 0xFF, // LOGICAL_MAXIMUM (255)
+		
+		//這是一個 global item，選擇usage page為鍵盤。
+		//前面已經選擇過usage page為鍵盤了，所以該item不要也可以。
+		0x05, 0x07, // USAGE_PAGE (Keyboard/Keypad)
+		
+		//這是一個 local item，定義usage最小值為0（0表示沒有鍵按下）
+		0x19, 0x00, // USAGE_MINIMUM (Reserved (no event indicated))
+		
+		//這是一個 local item，定義usage最大值為0x65
+		0x29, 0x65, // USAGE_MAXIMUM (Keyboard Application)
+		
+		//這是一個 main item。它說明這六個8bit的data field是輸入用的，
+		//屬性為：Data,Ary,Abs。Data說明數據是可以變的
+		//Ary說明這些數據域是一個array，即每個8bit都可以表示某個鍵值，
+		//如果按下的鍵太多（例如超過這裡定義的長度或者鍵盤本身無法
+		//掃描出按鍵情況時），則這些數據返回全1（二進制），表示按鍵無效。
+		//Abs表示這些值是絕對值。
+		0x81, 0x00, // INPUT (Data,Ary,Abs)
+		
+		/*
+		//以下為output report的描述
+		//邏輯最小值前面已經有定義為0了，這裡可以省略。 
+		//這是一個 global item，說明邏輯值最大為1。
+		0x25, 0x01, // LOGICAL_MAXIMUM (1)
+		
+		//這是一個 global item，說明data field數量為5個。 
+		0x95, 0x05, // REPORT_COUNT (5)
+		
+		//這是一個 global item，說明data field的長度為1bit。
+		0x75, 0x01, // REPORT_SIZE (1)
+		
+		//這是一個 global item，說明使用的usage page為指示燈（LED）
+		0x05, 0x08, // USAGE_PAGE (LEDs)
+		
+		//這是一個 local item，說明usage最小值為數字鍵盤燈。
+		0x19, 0x01, // USAGE_MINIMUM (Num Lock)
+		
+		//這是一個 local item，說明usage最大值為Kana燈。
+		0x29, 0x05, // USAGE_MAXIMUM (Kana)
+		
+		//這是一個 main item。定義輸出數據，即前面定義的5個LED。
+		0x91, 0x02, // OUTPUT (Data,Var,Abs)
+		
+		//這是一個 global item。定義bit field數量為1個。
+		0x95, 0x01, // REPORT_COUNT (1)
+		
+		//這是一個 global item。定義bit field長度為3bit。
+		0x75, 0x03, // REPORT_SIZE (3)
+		
+		//這是一個 main item，定義輸出constant，前面用了5bit，所以這裡需要
+		//3個bit來湊成一個byte。
+		0x91, 0x03, // OUTPUT (Cnst,Var,Abs)
+		*/
+	
+	//下面這個 main item用來關閉前面的collection。bSize為0，所以後面沒數據。
 	0xc0 // END_COLLECTION
 };
-//通過上面的report descriptor的定義，我們知道返回的input report具有4 byte。
-//第一個byte的低3 bit用來表示按鍵是否按下的，高5 bit為constant 0，無用。
-//第二個byte表示X軸的改變量，第三個byte表示Y軸的改變量，第四個byte表示
-//滾輪的改變量。我們在interrupt endpoint 1 中應該要按照上面的格式返回實際的
-//鼠標數據。
+//通過上面的report descriptor的定義，我們知道返回的input report具有8 byte。
+//第一個byte的8個bit用來表示特殊鍵是否按下（例如Shift、Alt等鍵）。
+//第二個byte為保留值，值為constant 0。第三到第八個byte是一個普通鍵鍵值的array 
+//當沒有鍵按下時，全部6個byte值都為0。當只有一個普通鍵按下時，
+//這六個byte中的第一個byte值即為該按鍵的鍵值（具體的鍵值請看HID的usage table文檔）
+//當有多個普通鍵同時按下時，則同時返回這些鍵的鍵值。
+//如果按下的鍵太多，則這六個byte都為0xFF（不能返回0x00，這樣會讓作業系統認為所有鍵都已經釋放）。
+//至於鍵值在array中的先後順序是無所謂的
+//作業系統會負責檢查是否有新鍵按下。我們應該在interrupt endpoint 1中按照上面的格式返回實際的鍵盤數據。
+//
+//另外，report中還定義了一個byte的out report
+//是用來控制LED情況的。只使用了低7 bit，高1 bit是保留值0。
+//當某bit的值為1時，則表示對應的LED要點亮。作業系統會負責同步各個
+//鍵盤之間的LED，例如你有兩塊鍵盤，一塊的數字鍵盤燈亮時，另一塊
+//也會跟著亮。鍵盤本身不需要判斷各種LED應該何時亮，它只是等待主機
+//發送report給它，然後根據report值來點亮相應的LED。我們在endpoint 1 OUT interrupt
+//中讀出這1 byte的outpur report，然後對它取反（因為學習板上的LED是低電平時
+//亮），直接發送到LED上。這樣main函數中按鍵點亮LED的代碼就不需要了。
 ///////////////////////////report descriptor完畢////////////////////////////
 
 
@@ -233,8 +273,8 @@ code unsigned char ConfigurationDescriptor[9+9+9+7]=
 	//bAlternateSetting字段。該interface的備用編號，為0。
 	0x00,
 	
-	//bNumEndpoints字段。非0 endpoint的數目。由於USB鼠標只需要一個
-	//interrupt IN endpoint，因此該值為1。
+	//bNumEndpoints字段。non-zero endpoint的數目。該USB鍵盤需要二個interrupt endpoint
+	//(一個IN、一個OUT)，因此該值為2。
 	0x01,
 	
 	//bInterfaceClass字段。該interface所使用的class。USB鼠標是HID class，
@@ -248,7 +288,7 @@ code unsigned char ConfigurationDescriptor[9+9+9+7]=
 	
 	//bInterfaceProtocol字段。如果subclass為支持引導啟動的subclass，
 	//則協議可選擇鼠標和鍵盤。鍵盤代碼為0x01，鼠標代碼為0x02。
-	0x02,
+	0x01,
 	
 	//iConfiguration字段。該interface的string index。這裡沒有，為0。
 	0x00,
@@ -353,7 +393,7 @@ code unsigned char ManufacturerStringDescriptor[60]={
 };
 /////////////////////////vendor string結束/////////////////////////////
 
-//字串"phisoner的滑鼠" 
+//字串"phisoner的鍵盤" 
 //8bit little endian格式
 code unsigned char ProductStringDescriptor[24]={
 	24,         //該descriptor的長度為24 byte
@@ -367,8 +407,8 @@ code unsigned char ProductStringDescriptor[24]={
 	0x65,0x00,  //e
 	0x72,0x00,  //r
 	0x84,0x76,  //的 
-	0xd1,0x6e,  //滑 
-	0x20,0x9f   //鼠 
+	0x75,0x93,  //鍵 
+	0xe4,0x76   //盤 
 };
 ////////////////////////product string結束////////////////////////////
 

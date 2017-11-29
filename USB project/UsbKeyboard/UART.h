@@ -1,9 +1,5 @@
 #include <AT89X52.h>
 
-/*
-設定baud rate = 2400  (2400bps)
-PC使用RS232的serial port來接收資料
-*/
 
 void InitUART(void);
 void UARTPutChar(unsigned char c);		   //透過serial port傳送ㄧ個char字元

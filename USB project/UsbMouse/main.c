@@ -1,25 +1,21 @@
 #include <AT89X52.h>
+#include <stdlib.h>
 #include "PDIUSBD12.h"
 #include "UART.h"
 #include "key.h"
 #include "UsbCore.h"
 
-/*
-serial port實驗(傳資料到電腦中)
-設定baud rate = 1200  (1200bps)
-PC使用RS232的serial port來接收資料
-*/
-
 code char headTable[][74] = {
 "**********************************************************\r\n", 
-"******             江承翰的USB鼠標 \n", 
+"******             江承翰的USB滑鼠 \n", 
 "******             AT89S52 CPU \n", 
-"******               建立日期：",__DATE__,"\r\n", 
+"******               建立日期：",__DATE__,"\n", 
 "******               建立時間：",__TIME__,"\r\n", 
 "******               作者：phisoner\n", 
 "******               歡迎訪問我的github\n", 
 "******        https://github.com/XassassinXsaberX\n",  
 "******               請按K0-K15分別進行測試\n", 
+"******  K0:滑鼠右鍵  K1:滑鼠中鍵  K2、K3:滑鼠左鍵\n",
 "******  K4、K5:游標右移  K6、K7:遊標左移  K9、K10:遊標下移\n", 
 "******  K13、K14:遊標上移  K8、K11:滾輪下滾  K12、K15:滾輪上滾\n", 
 "**********************************************************\n", 
@@ -82,14 +78,13 @@ void main()
 {
 	
 	unsigned int id;
-	char led;
 	volatile unsigned interruptSource;
 	int i;
 	InitUART();
 	InitKeyboard();
 	
 
-	for(i=0;i<16;i++)
+	for(i=0;i<sizeof(headTable)/74;i++)
 	{
 		Prints(headTable[i]);
 	}
@@ -110,23 +105,10 @@ void main()
 		KeyCanChange = 1;	      //准許按鍵能被按下
 		if(pressKey != NOPRESS)	  //如果有按鍵被按下時
 		{
-			//檢查KEY變數，來看看是哪個按鍵被按下
-			for(i=0;i<16;i++)
-				if( (KEY>>i) & 0x01 )
-					led = led_word[i];
-			//id = D12ReadID();
-			//Prints("chip ID 為 ");
-			//PrintShortIntHex(id);
-			//UARTPutChar('\n');
-			//Prints("you press ");
-			//PrintHex(led);
-			//UARTPutChar('\n');
-			//P2 = led;
-			if(ConfigValue)
+			if(ConfigValue)	      //如果已成功設定configuration
 			{
-				//PrintShortIntHex(ConfigValue);
-				if(Ep1InIsBusy == 0)
-					SendReport();
+				if(Ep1InIsBusy == 0)	   //如果此時endpoint 1 IN 沒有傳送資料給host
+					SendReport();		   //這時才能透過endpoint 1 IN 傳送report給host
 			}
 				
 			//while(pressKey != NOPRESS);
@@ -138,22 +120,22 @@ void main()
 		{
 			D12WriteCommand(READ_INTERRUPT_REGISTER);	//寫入 "讀取interrupt register command"
 			interruptSource = D12ReadByte();		    //讀取interrupt register
-			D12ReadByte();
+
 			if((interruptSource>>7) & 0x01)			    //如果發生USB Bus suspend
 				UsbBusSuspend();
 			if((interruptSource>>6) & 0x01)		        //如果發生USB Bus reset
 				UsbBusReset();
-			if((interruptSource>>5) & 0x01)			    //
+			if((interruptSource>>5) & 0x01)			    //如果USB的endpoint 2 IN 傳送完資料 
 				UsbEp2In();
-			if((interruptSource>>4) & 0x01)
+			if((interruptSource>>4) & 0x01)			    //如果USB的endpoint 2 OUT 有收到資料 
 				UsbEp2Out();
-			if((interruptSource>>3) & 0x01)
+			if((interruptSource>>3) & 0x01)		        //如果USB的endpoint 1 IN 傳送完資料
 				UsbEp1In();
-			if((interruptSource>>2) & 0x01)
+			if((interruptSource>>2) & 0x01)				//如果USB的endpoint 1 OUT 有收到資料
 				UsbEp1Out();
-			if((interruptSource>>1) & 0x01)
+			if((interruptSource>>1) & 0x01)				//如果USB的endpoint 0 IN 傳送完資料
 				UsbEp0In();
-			if((interruptSource>>0) & 0x01)
+			if((interruptSource>>0) & 0x01)				//如果USB的endpoint 0 OUT 有收到資料
 				UsbEp0Out();
 			
 				
