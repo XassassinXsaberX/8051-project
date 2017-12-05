@@ -167,9 +167,11 @@ code unsigned char ReportDescriptor[]=
 		//Abs表示這些值是絕對值。
 		0x81, 0x00, // INPUT (Data,Ary,Abs)
 		
-		/*
+		
 		//以下為output report的描述
-		//邏輯最小值前面已經有定義為0了，這裡可以省略。 
+		//邏輯最小值前面已經有定義為0了，這裡可以省略。
+		0x15, 0x00, // LOGICAL_MINIMUM (0)		 (不行省略...)
+		 
 		//這是一個 global item，說明邏輯值最大為1。
 		0x25, 0x01, // LOGICAL_MAXIMUM (1)
 		
@@ -199,8 +201,8 @@ code unsigned char ReportDescriptor[]=
 		
 		//這是一個 main item，定義輸出constant，前面用了5bit，所以這裡需要
 		//3個bit來湊成一個byte。
-		0x91, 0x03, // OUTPUT (Cnst,Var,Abs)
-		*/
+		0x91, 0x01, // OUTPUT (Cnst,Var,Abs)
+		
 	
 	//下面這個 main item用來關閉前面的collection。bSize為0，所以後面沒數據。
 	0xc0 // END_COLLECTION
@@ -228,7 +230,7 @@ code unsigned char ReportDescriptor[]=
 
 //USB配置描述符集合的定義
 //configuration descriptor總長度為9+9+9+7 byte
-code unsigned char ConfigurationDescriptor[9+9+9+7]=
+code unsigned char ConfigurationDescriptor[9+9+9+7+7]=
 {
  /***************configuration descriptor***********************/
 	//bLength字段。configuration descriptor的長度為9byte。
@@ -275,7 +277,7 @@ code unsigned char ConfigurationDescriptor[9+9+9+7]=
 	
 	//bNumEndpoints字段。non-zero endpoint的數目。該USB鍵盤需要二個interrupt endpoint
 	//(一個IN、一個OUT)，因此該值為2 (先只使用IN endpoint，所以只有一個endpoint)。
-	0x01,
+	0x02,
 	
 	//bInterfaceClass字段。該interface所使用的class。USB鍵盤是HID class，
 	//HID class的編碼為0x03。
@@ -338,10 +340,10 @@ code unsigned char ConfigurationDescriptor[9+9+9+7]=
 	0x00,
 	
 	//bInterval字段。endpoint polling的時間，我們設置為10個frame時間，即10ms。
-	0x0A
+	0x0A,
 
 	/**********************OUT endpoint descriptor***********************/
-	/*
+	
 	//bLength字段。endpoint descriptor長度為7 byte。
 	0x07,
 	
@@ -363,7 +365,7 @@ code unsigned char ConfigurationDescriptor[9+9+9+7]=
 	
 	//bInterval字段。endpoint polling的時間，我們設置為10個frame時間，即10ms。
 	0x0A
-	*/
+	
 };
 ////////////////////////配置描述符集合完畢//////////////////////////
 
@@ -892,9 +894,32 @@ void UsbEp0In(void)      //endpoint 0 IN , interrupt處理函數
 
 void UsbEp1Out(void)     //endpoint 1 OUT , interrupt處理函數
 {
+	
+	unsigned char Buf[1]={0};
 	#ifdef DEBUG0
 		Prints("USB endpoint 1 OUT interrupt\n");
 	#endif
+
+	#ifndef DEBUG0
+		Prints("USB endpoint 1 OUT interrupt\n");
+	#endif
+
+	D12ReadEndpointLastStatus(2); //讀取endpoint 1 OUT中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
+	switch(D12ReadEndpointBuffer(2,1,Buf))
+	{
+		case 0:
+			Prints("endpoint 1 OUT 收到0 byte的資料\n");
+			PrintHex(Buf[0]);
+			Prints("\n");
+			break;
+		default:
+			Prints("endpoint 1 OUT 收到");
+			PrintHex(Buf[0]);
+			Prints("\n");
+			break;
+	}
+	
+
 } 
 
 void UsbEp1In(void)      //endpoint 1 IN , interrupt處理函數 
