@@ -8,7 +8,6 @@ void D12WriteCommand(unsigned char command)	 //對PSIUSBD12晶片輸入"寫入指令"，並
 	D12_WR = 0;
 	D12_DATA = command;
 	D12_WR = 1;
-	//D12_DATA = 0xff;
 }
 
 
@@ -16,7 +15,6 @@ unsigned char D12ReadByte(void)	//對PSIUSBD12晶片輸入"讀取1 byte 資料"，並回傳讀
 {
 	//可參考PDIUSBD12晶片datasheet中的時序圖
 	unsigned char tmp;
-	//D12_DATA = 0xff;
 	D12_A0 = 0;			 //select the data phase
 	D12_RD = 0;
 	tmp = D12_DATA;
@@ -31,7 +29,6 @@ void D12WriteByte(unsigned char d)	//對PSIUSBD12晶片輸入"寫入1 byte 資料"
 	D12_WR = 0;
 	D12_DATA = d;
 	D12_WR = 1;
-	//D12_DATA = 0xff;
 }
 
 unsigned int D12ReadID(void)  //回傳該晶片的id

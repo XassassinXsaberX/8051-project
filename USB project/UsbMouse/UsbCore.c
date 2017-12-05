@@ -748,7 +748,7 @@ void UsbEp0Out(void)     //endpoint 0 OUT , interrupt處理函數
 				#endif
 				if(bRequest == SET_IDLE)
 				{	
-					#ifdef DUBUG0
+					#ifdef DEBUG0
 						Prints("SET_IDLE\n");
 					#endif
 					//回傳ㄧ個data byte數目為0的data packet告知host已成功收到此standard OUT request
@@ -795,6 +795,9 @@ void UsbEp0SendData(void)
 {
 	//SendLength變數代表目前還有幾個byte的資料需要傳輸
 	//DeviceDescriptor[7]代表endpoint 0 IN 的buffer容量 (單位為byte)
+	//每次傳送DeviceDescriptor[7]個byte
+	//若最後剛好傳送完，還要再送ㄧ個data byte數目為0 byte的data packet，告知host傳送完畢
+	//若最後傳送的data byte數目少於DeviceDescriptor[7]，則host就知道這是最後ㄧ個data packet
 	if(SendLength >= DeviceDescriptor[7])
 		D12WriteEndpointBuffer(1,DeviceDescriptor[7],sendPtr);	
 	else
@@ -812,7 +815,7 @@ void UsbEp0In(void)      //endpoint 0 IN , interrupt處理函數
 	
 	status = D12ReadEndpointLastStatus(1); //讀取endpoint 0 IN中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
 
-	#ifndef DEGUB0
+	#ifndef DEBUG0
 		DelayXus(50);                      //若不delay 50 us就會出現錯誤(而且不能delay太快或太久)，目前仍無法解釋...
 	#endif
 

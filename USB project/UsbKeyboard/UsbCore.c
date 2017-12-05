@@ -813,7 +813,7 @@ void UsbEp0Out(void)     //endpoint 0 OUT , interrupt處理函數
 				#endif
 				if(bRequest == SET_IDLE)
 				{	
-					#ifdef DUBUG0
+					#ifdef DEBUG0
 						Prints("SET_IDLE\n");
 					#endif
 					//回傳ㄧ個data byte數目為0的data packet告知host已成功收到此standard OUT request
@@ -877,7 +877,7 @@ void UsbEp0In(void)      //endpoint 0 IN , interrupt處理函數
 	
 	status = D12ReadEndpointLastStatus(1); //讀取endpoint 0 IN中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
 
-	#ifndef DEGUB0
+	#ifndef DEBUG0
 		DelayXus(50);                      //若不delay 50 us就會出現錯誤(而且不能delay太快或太久)，目前仍無法解釋...
 	#endif
 

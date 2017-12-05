@@ -114,23 +114,23 @@ void main()
 		if(D12_INT == 0)   //如果PDIUSBD12晶片發生interrupt
 		{
 			D12WriteCommand(READ_INTERRUPT_REGISTER);	//寫入 "讀取interrupt register command"
-			interruptSource = D12ReadByte();		    //讀取interrupt register
-
-			if((interruptSource>>7) & 0x01)			    //如果發生USB Bus suspend
+			interruptSource = D12ReadByte();		    //讀取interrupt register的第一個byte
+			
+			if((interruptSource>>7) & 0x01)			    //如果發生USB Bus suspend   
 				UsbBusSuspend();
 			if((interruptSource>>6) & 0x01)		        //如果發生USB Bus reset
 				UsbBusReset();
-			if((interruptSource>>5) & 0x01)			    //如果USB的endpoint 2 IN 傳送完資料 
+			if((interruptSource>>5) & 0x01)			    //如果USB的endpoint 2 IN 傳送完data packet給host後
 				UsbEp2In();
-			if((interruptSource>>4) & 0x01)			    //如果USB的endpoint 2 OUT 有收到資料 
+			if((interruptSource>>4) & 0x01)				//如果USB的endpoint 2 OUT 有收到來自host的data packet
 				UsbEp2Out();
-			if((interruptSource>>3) & 0x01)		        //如果USB的endpoint 1 IN 傳送完資料
+			if((interruptSource>>3) & 0x01)				//如果USB的endpoint 1 IN 傳送完data packet給host後
 				UsbEp1In();
-			if((interruptSource>>2) & 0x01)				//如果USB的endpoint 1 OUT 有收到資料
+			if((interruptSource>>2) & 0x01)				//如果USB的endpoint 1 OUT 有收到來自host的data packet
 				UsbEp1Out();
-			if((interruptSource>>1) & 0x01)				//如果USB的endpoint 0 IN 傳送完資料
+			if((interruptSource>>1) & 0x01)				//如果USB的endpoint 0 IN 傳送完data packet給host後
 				UsbEp0In();
-			if((interruptSource>>0) & 0x01)				//如果USB的endpoint 0 OUT 有收到資料
+			if((interruptSource>>0) & 0x01)				//如果USB的endpoint 0 OUT 有收到來自host的data packet
 				UsbEp0Out();
 			
 				
