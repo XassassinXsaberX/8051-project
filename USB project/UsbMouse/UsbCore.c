@@ -413,7 +413,7 @@ void UsbDisconnect(void) //USB斷開連接 , interrupt處理函數
 	D12WriteCommand(D12_SET_MODE);		//寫入Set Mode command到USB晶片中 (該command需要再輸入2byte資料)
 	D12WriteByte(0x06);		            //寫入第一個byte的資料到USB晶片中
 	D12WriteByte(0x47);				    //寫入第二個byte的資料到USB晶片中
-	DelayXms(1000);                     //delay 1ms (使主機確認設備已經斷開連結)
+	DelayXms(1000);                     //delay 1s (使主機確認設備已經斷開連結)
 }
 
 void UsbConnect(void)    //USB連接 , interrupt處理函數
@@ -460,9 +460,6 @@ void UsbEp0Out(void)     //endpoint 0 OUT , interrupt處理函數
 	status = D12ReadEndpointLastStatus(0);	    //"讀取endpoint 0 OUT最後ㄧ次transaction的狀態" 的command
 	                                            //該命令可清除interrupt register中，每一個interrupt對應到的interrupt flag
                                                 //將讀取到的 "最後ㄧ次transaction的狀態資料" 存到status變數中
-   	#ifndef	DEBUG0
-		DelayXus(50);	                        //若不delay 50 us就會出現錯誤(而且不能delay太快或太久)，目前仍無法解釋...
-	#endif		
 									 
 	if((status>>5) & 0x01)	                    //如果最後ㄧ次transaction為setup stage
 	{
@@ -808,16 +805,11 @@ void UsbEp0SendData(void)
 
 void UsbEp0In(void)      //endpoint 0 IN , interrupt處理函數
 {
-	unsigned char status;
 	#ifdef DEBUG0
 		Prints("USB endpoint 0 IN interrupt\n");
 	#endif
 	
-	status = D12ReadEndpointLastStatus(1); //讀取endpoint 0 IN中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
-
-	#ifndef DEBUG0
-		DelayXus(50);                      //若不delay 50 us就會出現錯誤(而且不能delay太快或太久)，目前仍無法解釋...
-	#endif
+	D12ReadEndpointLastStatus(1);            //讀取endpoint 0 IN中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
 
 	if(SendLength >= DeviceDescriptor[7])    //SendLength代表上次傳輸時，還需要傳送的資料長度
 	{
@@ -837,11 +829,11 @@ void UsbEp1Out(void)     //endpoint 1 OUT , interrupt處理函數
 
 void UsbEp1In(void)      //endpoint 1 IN , interrupt處理函數 
 {
-	unsigned char status;
 	#ifdef DEBUG0
 		Prints("USB endpoint 1 IN interrupt\n");
 	#endif
-	status = D12ReadEndpointLastStatus(3);
+	
+	D12ReadEndpointLastStatus(3);	 //讀取endpoint 1 IN中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
 
 	Ep1InIsBusy = 0;
 } 

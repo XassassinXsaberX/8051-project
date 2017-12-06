@@ -170,8 +170,6 @@ code unsigned char ReportDescriptor[]=
 		
 		//以下為output report的描述
 		//邏輯最小值前面已經有定義為0了，這裡可以省略。
-		0x15, 0x00, // LOGICAL_MINIMUM (0)		 (不行省略...)
-		 
 		//這是一個 global item，說明邏輯值最大為1。
 		0x25, 0x01, // LOGICAL_MAXIMUM (1)
 		
@@ -229,7 +227,7 @@ code unsigned char ReportDescriptor[]=
 
 
 //USB配置描述符集合的定義
-//configuration descriptor總長度為9+9+9+7 byte
+//configuration descriptor總長度為9+9+9+7+7 byte
 code unsigned char ConfigurationDescriptor[9+9+9+7+7]=
 {
  /***************configuration descriptor***********************/
@@ -526,10 +524,7 @@ void UsbEp0Out(void)     //endpoint 0 OUT , interrupt處理函數
 
 	status = D12ReadEndpointLastStatus(0);	    //"讀取endpoint 0 OUT最後ㄧ次transaction的狀態" 的command
 	                                            //該命令可清除interrupt register中，每一個interrupt對應到的interrupt flag
-                                                //將讀取到的 "最後ㄧ次transaction的狀態資料" 存到status變數中
-   	#ifndef	DEBUG0
-		DelayXus(50);	                        //若不delay 50 us就會出現錯誤(而且不能delay太快或太久)，目前仍無法解釋...
-	#endif		
+                                                //將讀取到的 "最後ㄧ次transaction的狀態資料" 存到status變數中	
 									 
 	if((status>>5) & 0x01)	                    //如果最後ㄧ次transaction為setup stage
 	{
@@ -872,16 +867,11 @@ void UsbEp0SendData(void)
 
 void UsbEp0In(void)      //endpoint 0 IN , interrupt處理函數
 {
-	unsigned char status;
 	#ifdef DEBUG0
 		Prints("USB endpoint 0 IN interrupt\n");
 	#endif
 	
-	status = D12ReadEndpointLastStatus(1); //讀取endpoint 0 IN中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
-
-	#ifndef DEBUG0
-		DelayXus(50);                      //若不delay 50 us就會出現錯誤(而且不能delay太快或太久)，目前仍無法解釋...
-	#endif
+	D12ReadEndpointLastStatus(1);            //讀取endpoint 0 IN中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
 
 	if(SendLength >= DeviceDescriptor[7])    //SendLength代表上次傳輸時，還需要傳送的資料長度
 	{
@@ -900,11 +890,7 @@ void UsbEp1Out(void)     //endpoint 1 OUT , interrupt處理函數
 		Prints("USB endpoint 1 OUT interrupt\n");
 	#endif
 
-	#ifndef DEBUG0
-		Prints("USB endpoint 1 OUT interrupt\n");
-	#endif
-
-	D12ReadEndpointLastStatus(2); //讀取endpoint 1 OUT中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
+	D12ReadEndpointLastStatus(2);            //讀取endpoint 1 OUT中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
 	switch(D12ReadEndpointBuffer(2,1,Buf))
 	{
 		case 0:
@@ -924,11 +910,10 @@ void UsbEp1Out(void)     //endpoint 1 OUT , interrupt處理函數
 
 void UsbEp1In(void)      //endpoint 1 IN , interrupt處理函數 
 {
-	unsigned char status;
 	#ifdef DEBUG0
 		Prints("USB endpoint 1 IN interrupt\n");
 	#endif
-	status = D12ReadEndpointLastStatus(3);
+	D12ReadEndpointLastStatus(3);	          //讀取endpoint 1 IN中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
 
 	Ep1InIsBusy = 0;
 } 
