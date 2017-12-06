@@ -45,9 +45,9 @@ code unsigned char DeviceDescriptor[0x12]=  //device descriptor為18byte
 	0x88,
 	0x88,
 	
-	//idProduct字段。Product ID，由於是第三個實驗，我們這裡取0x0003。
+	//idProduct字段。Product ID，由於是第四個實驗，我們這裡取0x0004。
 	//注意little endian模式，低byte應該在前。
-	0x03,
+	0x04,
 	0x00,
 	
 	//bcdDevice字段。我們這個USB滑鼠鍵盤剛開始做，就叫它1.0版吧，即0x0100。
@@ -73,10 +73,9 @@ code unsigned char DeviceDescriptor[0x12]=  //device descriptor為18byte
 };
 
 //USB report descriptor的定義
-code unsigned char ReportDescriptor[]=
+code unsigned char KeyboardReportDescriptor[]=
 {
 
-	/******************** USB 鍵盤部分 report descriptor ********************/
 	//每行開始的第一個byte為該item的prefix，prefix的格式為：
 	//D7~D4：bTag。D3~D2：bType；D1~D0：bSize。以下分別對每個item註釋。
 	
@@ -209,8 +208,12 @@ code unsigned char ReportDescriptor[]=
 	
 	//下面這個 main item用來關閉前面的collection。bSize為0，所以後面沒數據。
 	0xc0, // END_COLLECTION
+	
 
-	/******************** USB 滑鼠部分 report descriptor ********************/
+};
+
+code unsigned char MouseReportDescriptor[]=
+{
 	//這是一個global item(bType為1)，選擇Usage page為普通桌面Generic Desktop Page(0x01)
 	//後面跟 1 byte的數據（bSize為1），後面的byte數就不註釋了，
 	//自己根據bSize來判斷。
@@ -224,8 +227,8 @@ code unsigned char ReportDescriptor[]=
 	//普通桌面用的滑鼠。
 	0xa1, 0x01, // COLLECTION (Application)
 
-		//report ID，這裡定義鍵盤report的ID為2 (report ID 0是保留的)
-		0x85,0x02,  // Report ID 2
+		//report ID，這裡定義鍵盤report的ID為1 (report ID 0是保留的)
+		0x85,0x01,  // Report ID 1
 	
 		//這是一個local item。說明Usage為pointer collection
 		0x09, 0x01, // USAGE (Pointer)
@@ -312,33 +315,14 @@ code unsigned char ReportDescriptor[]=
 		//下面這兩個main item用來關閉前面的collection用。
 		//我們開了兩個collection，所以要關兩次。bSize為0，所以後面沒數據。
 		0xc0, // END_COLLECTION
-	0xc0 // END_COLLECTION
-
+	0xc0 // END_COLLECTION	
 };
-//通過上面的report descriptor的定義，我們知道返回的input report具有8 byte。
-//第一個byte的8個bit用來表示特殊鍵是否按下（例如Shift、Alt等鍵）。
-//第二個byte為保留值，值為constant 0。第三到第八個byte是一個普通鍵鍵值的array 
-//當沒有鍵按下時，全部6個byte值都為0。當只有一個普通鍵按下時，
-//這六個byte中的第一個byte值即為該按鍵的鍵值（具體的鍵值請看HID的usage table文檔）
-//當有多個普通鍵同時按下時，則同時返回這些鍵的鍵值。
-//如果按下的鍵太多，則這六個byte都為0xFF（不能返回0x00，這樣會讓作業系統認為所有鍵都已經釋放）。
-//至於鍵值在array中的先後順序是無所謂的
-//作業系統會負責檢查是否有新鍵按下。我們應該在interrupt endpoint 1中按照上面的格式返回實際的鍵盤數據。
-//
-//另外，report中還定義了一個byte的out report
-//是用來控制LED情況的。只使用了低7 bit，高1 bit是保留值0。
-//當某bit的值為1時，則表示對應的LED要點亮。作業系統會負責同步各個
-//鍵盤之間的LED，例如你有兩塊鍵盤，一塊的數字鍵盤燈亮時，另一塊
-//也會跟著亮。鍵盤本身不需要判斷各種LED應該何時亮，它只是等待主機
-//發送report給它，然後根據report值來點亮相應的LED。我們在endpoint 1 OUT interrupt
-//中讀出這1 byte的outpur report，然後對它取反（因為學習板上的LED是低電平時
-//亮），直接發送到LED上。這樣main函數中按鍵點亮LED的代碼就不需要了。
 ///////////////////////////report descriptor完畢////////////////////////////
 
 
 //USB配置描述符集合的定義
-//configuration descriptor總長度為9+9+9+7+7 byte
-code unsigned char ConfigurationDescriptor[9+9+9+7+7]=
+//configuration descriptor總長度為9+9+9+7+7+9+9+7 byte
+code unsigned char ConfigurationDescriptor[9+9+9+7+7+9+9+7]=
 {
  /***************configuration descriptor***********************/
 	//bLength字段。configuration descriptor的長度為9byte。
@@ -352,8 +336,8 @@ code unsigned char ConfigurationDescriptor[9+9+9+7+7]=
 	sizeof(ConfigurationDescriptor)&0xFF,      //低byte
 	(sizeof(ConfigurationDescriptor)>>8)&0xFF, //高byte 
 	
-	//bNumInterfaces字段。該configuration包含的interface數，只有一個interface。
-	0x01,
+	//bNumInterfaces字段。該configuration包含的interface數，有兩個interface。
+	0x02,
 	
 	//bConfiguration字段。該configuration的值為1。
 	0x01,
@@ -370,7 +354,7 @@ code unsigned char ConfigurationDescriptor[9+9+9+7+7]=
  	//電流為2mA，所以這裡設置為50(0x32)。
 	0x32,
 	
-	/*******************interface descriptor*********************/
+	/*******************第一個interface descriptor*********************/
 	//bLength字段。interface descriptor的長度為9byte。
 	0x09,
 	
@@ -424,8 +408,8 @@ code unsigned char ConfigurationDescriptor[9+9+9+7+7]=
 	0x22,
 	
 	//bDescriptorLength字段。下級描述符的長度。下級descroptor為report descriptor。
-	sizeof(ReportDescriptor)&0xFF,
-	(sizeof(ReportDescriptor)>>8)&0xFF,
+	sizeof(KeyboardReportDescriptor)&0xFF,
+	(sizeof(KeyboardReportDescriptor)>>8)&0xFF,
 	
 	/**********************IN endpoint descriptor***********************/
 	//bLength字段。endpoint descriptor長度為7byte。
@@ -472,8 +456,87 @@ code unsigned char ConfigurationDescriptor[9+9+9+7+7]=
 	0x00,
 	
 	//bInterval字段。endpoint polling的時間，我們設置為10個frame時間，即10ms。
-	0x0A
+	0x0A,
+
+	/*******************第二個interface descriptor*********************/
+	//bLength字段。interface descriptor的長度為9byte。
+	0x09,
 	
+	//bDescriptorType字段。interface descriptor的編號為0x04。
+	0x04,
+	
+	//bInterfaceNumber字段。該interface的編號，第二個interface，編號為1。
+	0x01,
+	
+	//bAlternateSetting字段。該interface的備用編號，為0。
+	0x00,
+	
+	//bNumEndpoints字段。non-zero endpoint的數目。該USB滑鼠需要ㄧ個interrupt IN endpoint，因此該值為1。
+	0x01,
+	
+	//bInterfaceClass字段。該interface所使用的class。USB鍵盤是HID class，
+	//HID class的編碼為0x03。
+	0x03,
+	
+	//bInterfaceSubClass字段。該interface所使用的subclass。在HID1.1協議中，
+	//只規定了一種subclass：支持BIOS引導啟動的subclass。
+	//USB鍵盤、滑鼠屬於該subclass，subclass代碼為0x01。
+	0x01,
+	
+	//bInterfaceProtocol字段。如果subclass為支持引導啟動的subclass，
+	//則協議可選擇滑鼠和鍵盤。鍵盤代碼為0x01，滑鼠代碼為0x02。
+	0x02,
+	
+	//iConfiguration字段。該interface的string index。這裡沒有，為0。
+	0x00,
+	
+	/******************HID descriptor************************/
+	//bLength字段。本HID descriptor下只有一個下級descriptor。所以長度為9 byte。
+	0x09,
+	
+	//bDescriptorType字段。HID descriptor的編號為0x21。
+	0x21,
+	
+	//bcdHID字段。本協議使用的HID1.1協議。注意低byte在先。
+	0x10,
+	0x01,
+	
+	//bCountyCode字段。設備適用的國家代碼，這裡選擇為美國，代碼0x21。
+	0x21,
+	
+	//bNumDescriptors字段。下級描述符的數目。我們只有一個report descriptor。
+	0x01,
+	
+	//bDescriptorType字段。下級描述符的類型，為report descriptor，編號為0x22。
+	0x22,
+	
+	//bDescriptorLength字段。下級描述符的長度。下級descroptor為report descriptor。
+	sizeof(MouseReportDescriptor)&0xFF,
+	(sizeof(MouseReportDescriptor)>>8)&0xFF,
+	
+	/**********************IN endpoint descriptor***********************/
+	//bLength字段。endpoint descriptor長度為7byte。
+	0x07,
+	
+	//bDescriptorType字段。endpoint descriptor編號為0x05。
+	0x05,
+	
+	//bEndpointAddress字段。endpoint的地址。我們使用D12的IN endpoint 2。
+	//D7位表示數據方向，IN endpoint D7為1。所以IN endpoint 2 的地址為0x81。
+	0x82,
+	
+	//bmAttributes字段。D1~D0為endpoint傳輸類型選擇。
+	//該endpoint為interrupt endpoint。interrupt endpoint的編號為3。其它bit保留為0。
+	0x03,
+	
+	//wMaxPacketSize字段。該endpoint的最大packet長。endpoint 2 的最大packet長為64byte。
+	//注意低byte在先。
+	0x40,
+	0x00,
+	
+	//bInterval字段。endpoint polling的時間，我們設置為10個frame時間，即10ms。
+	0x0A,
+
 };
 ////////////////////////配置描述符集合完畢//////////////////////////
 
@@ -783,12 +846,30 @@ void UsbEp0Out(void)     //endpoint 0 OUT , interrupt處理函數
 						#ifdef DEBUG0
 							Prints("report descriptor\n");
 						#endif	
-						if(wLength > sizeof(ReportDescriptor) )
-								SendLength =  sizeof(ReportDescriptor);  //決定要送幾個byte
-						else
-							SendLength = wLength;
-
-						sendPtr = ReportDescriptor;			             //決定要送哪些資料
+						//GET_DESCRIPTOR(report descriptor)時，wIndex中保存的是request的interface編號
+						//此處有兩個interface，interface 0 用來時現鍵盤功能、interface 1 用來時現鍵盤功能
+						if(wIndex == 0)	     //鍵盤interface
+						{
+							if(wLength > sizeof(KeyboardReportDescriptor) )
+									SendLength =  sizeof(KeyboardReportDescriptor);  //決定要送幾個byte
+							else
+								SendLength = wLength;
+	
+							sendPtr = KeyboardReportDescriptor;			             //決定要送哪些資料	
+						}
+						else if(wIndex == 1) //滑鼠interface
+						{
+							if(wLength > sizeof(MouseReportDescriptor) )
+									SendLength =  sizeof(MouseReportDescriptor);     //決定要送幾個byte
+							else
+								SendLength = wLength;
+	
+							sendPtr = MouseReportDescriptor;			             //決定要送哪些資料	
+						}
+						else                  //其他為定義的interface，device回傳data byte數目為0的data packet給host
+						{
+							SendLength = 0;
+						}
 						UsbEp0SendData();
 					}
 					else
@@ -1049,4 +1130,8 @@ void UsbEp2In(void)      //endpoint 2 IN , interrupt處理函數
 	#ifdef DEBUG0
 		Prints("USB endpoint 2 IN interrupt\n");
 	#endif
+
+	D12ReadEndpointLastStatus(5);	          //讀取endpoint 2 IN中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
+
+	Ep1InIsBusy = 0;
 } 

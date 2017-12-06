@@ -274,7 +274,7 @@ code unsigned char ConfigurationDescriptor[9+9+9+7+7]=
 	0x00,
 	
 	//bNumEndpoints字段。non-zero endpoint的數目。該USB鍵盤需要二個interrupt endpoint
-	//(一個IN、一個OUT)，因此該值為2 (先只使用IN endpoint，所以只有一個endpoint)。
+	//(一個IN、一個OUT)，因此該值為2。
 	0x02,
 	
 	//bInterfaceClass字段。該interface所使用的class。USB鍵盤是HID class，
