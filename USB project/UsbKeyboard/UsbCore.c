@@ -843,11 +843,6 @@ void UsbEp0Out(void)     //endpoint 0 OUT , interrupt處理函數
 		D12ReadEndpointBuffer(0, 16, Buffer);	//讀取指定endpoint的buffer
 		D12ClearBuffer(0);			            //清空endpoint 0 OUT buffer
 	}
-	
-		
-	
-		
-
 
 }
 
@@ -915,7 +910,6 @@ void UsbEp1Out(void)     //endpoint 1 OUT , interrupt處理函數
 			break;
 	}
 	
-
 } 
 
 void UsbEp1In(void)      //endpoint 1 IN , interrupt處理函數 

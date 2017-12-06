@@ -151,6 +151,8 @@ unsigned char D12WriteEndpointBuffer(unsigned char Endp, unsigned char Len, unsi
 
 }
 
+
+//只有使用該函數清除指定endpoint的buffer後，該endpoint才能接收新的data packet
 void D12ClearBuffer(unsigned char endpoint)	//清空特定OUT endpoint的buffer
 {
 	D12SelectEndpoint(endpoint);	        //選擇特定endpoint

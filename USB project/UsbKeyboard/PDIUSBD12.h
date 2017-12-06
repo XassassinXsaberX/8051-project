@@ -47,7 +47,7 @@ void D12ClearBuffer(unsigned char);                                             
 void D12ValidateBuffer(unsigned char);                                                  //使IN endpoint buffer有效
 unsigned char D12ReadEndpointLastStatus(unsigned char);	                                //讀取指定endpoint中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
 void D12AcknowledgeSetup(void);			                                                //acknowledge setup(目的是讓Clear Buffer command、Validate Buffer command能生效) 
-void D12SetAddress(unsigned char Addr);
+//void D12SetAddress(unsigned char Addr);
 //void D12SetEndpointEnable(unsigned char Enable);
 
 //#define DEBUG1
