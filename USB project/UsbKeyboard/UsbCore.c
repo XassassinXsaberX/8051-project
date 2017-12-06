@@ -885,23 +885,33 @@ void UsbEp0In(void)      //endpoint 0 IN , interrupt處理函數
 void UsbEp1Out(void)     //endpoint 1 OUT , interrupt處理函數
 {
 	
-	unsigned char Buf[1]={0};
+	unsigned char Buf=0;
 	#ifdef DEBUG0
 		Prints("USB endpoint 1 OUT interrupt\n");
 	#endif
 
 	D12ReadEndpointLastStatus(2);            //讀取endpoint 1 OUT中最後ㄧ次transaction的狀態，並清除interrupt register中的所有interrupt flag
-	switch(D12ReadEndpointBuffer(2,1,Buf))
+	D12ClearBuffer(2);						 //清空endpoint 1 OUT的buffer
+	switch(D12ReadEndpointBuffer(2,1,&Buf))
 	{
 		case 0:
 			Prints("endpoint 1 OUT 收到0 byte的資料\n");
-			PrintHex(Buf[0]);
+			PrintHex(Buf);
 			Prints("\n");
 			break;
 		default:
 			Prints("endpoint 1 OUT 收到");
-			PrintHex(Buf[0]);
+			PrintHex(Buf);
 			Prints("\n");
+
+			if(Buf & 0x01)
+				Prints("Num Lock燈亮\n");
+			else
+				Prints("Num Lock燈暗\n");
+			if(Buf & 0x02)
+				Prints("Caps Lock燈亮\n");
+			else
+				Prints("Caps Lock燈暗\n");
 			break;
 	}
 	
