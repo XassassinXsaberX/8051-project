@@ -24,102 +24,92 @@ code char headTable[][74] = {
 }; 
 
 
-void KeyBoardReset(unsigned char *Buf)
-{
-	char i;
-	for(i=2;i<8;i++)
-		Buf[i] = 0xff;
-}
-
-void SendReport(void)
-{
-	unsigned char Buf[8] = {0,0,0,0,0,0,0,0};
-	unsigned char i=2;
-	Ep1InIsBusy = 1;
+void SendNoteOnMsg(void) 
+{ 
+	//4 byte的緩衝區
+	unsigned char Buf[4];
 	
-	//Buf[0]有8個bit
-	//bit 0:為左Ctrl鍵、bit 1:為左Shift鍵、bit 2:為左Alt鍵、bit 3:為左GUI(即Window鍵)
-	//bit 4:為右Ctrl鍵、bit 5:為右Shift鍵、bit 6:為右Alt鍵、bit 7:為右GUI(即Window鍵)
-	if(KEY & 0x01)			  //如果鍵盤0被按下，則代表按下左Ctrl鍵
-		Buf[0] |= 1<<0;	      
-	if((KEY>>1) & 0x01)       //如果鍵盤1被按下，則代表按下左Shift鍵
-		Buf[0] |= 1<<1;
-	if((KEY>>2) & 0X01)       //如果鍵盤2被按下，則代表按下左Alt鍵
-		Buf[0] |= 1<<2;
-	if((KEY>>3) & 0X01)       //如果鍵盤3被按下，則代表按下左GUI(即Window鍵
-		Buf[0] |= 1<<3;	 
-
-
-	if((KEY>>4) & 0X01)       //如果鍵盤4被按下，則代表按下數字小鍵盤1 
-	{
-		Buf[i++] = 0x59;
-	}
-	if((KEY>>5) & 0X01)       //如果鍵盤5被按下，則代表按下數字小鍵盤2
-	{
-		Buf[i++] = 0x5a;
-	}
-	if((KEY>>6) & 0X01)       //如果鍵盤6被按下，則代表按下數字小鍵盤3
-	{
-		Buf[i++] = 0x5b;
-	}
-	if((KEY>>7) & 0X01)       //如果鍵盤7被按下，則代表按下數字小鍵盤4
-	{
-		Buf[i++] = 0x5c;
-	}
-	if((KEY>>8) & 0X01)       //如果鍵盤8被按下，則代表按下數字小鍵盤5
-	{
-		Buf[i++] = 0x5d;
-	}
-	if((KEY>>9) & 0X01)       //如果鍵盤9被按下，則代表按下數字小鍵盤6
-	{
-		Buf[i++] = 0x5e;
-	}
-	if((KEY>>10) & 0X01)      //如果鍵盤10被按下，則代表按下數字小鍵盤7
-	{	
-		if(i >= 8)
-			KeyBoardReset(Buf);	
-		else
-			Buf[i++] = 0x5f;
-	}
-	if((KEY>>11) & 0X01)      //如果鍵盤11被按下，則代表按下數字小鍵盤8
-	{
-		if(i >= 8)
-			KeyBoardReset(Buf);
-		else	
-			Buf[i++] = 0x60;			
-	}
-	if((KEY>>12) & 0X01)      //如果鍵盤12被按下，則代表按下數字小鍵盤9
-	{	
-		if(i >= 8)
-			KeyBoardReset(Buf);	
-		else
-			Buf[i++] = 0x61;
-	}
-	if((KEY>>13) & 0X01)      //如果鍵盤13被按下，則代表按下數字小鍵盤0
-	{
-		if(i >= 8)
-			KeyBoardReset(Buf);
-		else	
-			Buf[i++] = 0x62;			
-	}
-	if((KEY>>14) & 0X01)      //如果鍵盤14被按下，則代表按下Caps Lock
-	{
-		if(i >= 8)
-			KeyBoardReset(Buf);
-		else	
-			Buf[i++] = 0x39;			
-	}
-   	if((KEY>>15) & 0X01)      //如果鍵盤15被按下，則代表按下Num Lock
-	{
-		if(i >= 8)
-			KeyBoardReset(Buf);
-		else	
-			Buf[i++] = 0x53;			
-	}
-
+	//Note On message第一個byte固定為0x09，第二個byte為0x9n (n為通道號)
+	//第三個byte為0xKK（K為音高），第四個byte為0xVV（V為力度）。
 	
-	D12WriteEndpointBuffer(3,8,Buf);
-}
+	Buf[0]=0x09; //Note On message的packet header 
+	Buf[1]=0x90; //在通道0上發送Note On message 
+	Buf[3]=0x7F; //音量設置為最大 
+	
+	
+	if((KEY>>4) & 0x01) 
+	{ 
+		Buf[2]=55;       //C調的5 (絕對音高為G音)
+		//透過 IN endpoint 2 返回4 byte的 MIDI event packet。
+		D12WriteEndpointBuffer(5,4,Buf); 
+		Ep2InIsBusy=1;   //設置endpoint 2 忙標誌。
+ 	} 
+
+	else if((KEY>>5) & 0X01) 
+	{ 
+		Buf[2]=57;       //C調的6 (絕對音高為A音)
+		//透過 IN endpoint 2 返回4 byte的 MIDI event packet。
+		D12WriteEndpointBuffer(5,4,Buf); 
+		Ep2InIsBusy=1;   //設置endpoint 2 忙標誌。
+	} 
+	
+	else if((KEY>>6) & 0X01)
+	{
+		Buf[2]=60;       //C調的1 (絕對音高為C音，即中央C)
+		//透過 IN endpoint 2 返回4 byte的 MIDI event packet。
+		D12WriteEndpointBuffer(5,4,Buf); 
+		Ep2InIsBusy=1;   //設置endpoint 2 忙標誌。。
+	} 
+	
+	else if((KEY>>7) & 0X01) 
+	{ 
+		Buf[2]=62;       //C調的2 (絕對音高為D音)
+		//透過 IN endpoint 2 返回4 byte的 MIDI event packet。
+		D12WriteEndpointBuffer(5,4,Buf); 
+		Ep2InIsBusy=1;   //設置endpoint 2 忙標誌。
+	} 
+	
+	else if((KEY>>8) & 0X01) 
+	{ 
+		Buf[2]=64;       //C調的3 (絕對音高為E音)
+		//透過 IN endpoint 2 返回4 byte的 MIDI event packet。
+		D12WriteEndpointBuffer(5,4,Buf); 
+		Ep2InIsBusy=1;   //設置endpoint 2 忙標誌。
+	} 
+	
+	else if((KEY>>9) & 0X01) 
+	{
+		Buf[2]=67;       //C調的5 (絕對音高為G音)
+		//透過 IN endpoint 2 返回4 byte的 MIDI event packet。
+		D12WriteEndpointBuffer(5,4,Buf); 
+		Ep2InIsBusy=1;   //設置endpoint 2 忙標誌。
+	} 
+	
+	else if((KEY>>10) & 0X01) 
+	{ 
+		Buf[2]=69;       //C調的6 (絕對音高為A音)
+		//透過 IN endpoint 2 返回4 byte的 MIDI event packet。
+		D12WriteEndpointBuffer(5,4,Buf); 
+		Ep2InIsBusy=1;   //設置endpoint 2 忙標誌。
+	} 
+	
+	else if((KEY>>11) & 0X01) 
+	{ 
+		Buf[2]=72;       //C調的1 (絕對音高為C音)
+		//透過 IN endpoint 2 返回4 byte的 MIDI event packet。
+		D12WriteEndpointBuffer(5,4,Buf); 
+		Ep2InIsBusy=1;   //設置endpoint 2 忙標誌。
+	}
+	else
+	{
+		//如果有按鍵彈起，則關閉對應的音
+		Buf[3]=0x00; //音量設置為0 
+		D12WriteEndpointBuffer(5,4,Buf); 
+		Ep2InIsBusy=1;   //設置endpoint 2 忙標誌。	
+	}
+	
+	
+} 
 
 
 void main()
@@ -154,11 +144,11 @@ void main()
 		{
 			if(ConfigValue)			   //如果已成功設定configuration
 			{
-				if(Ep1InIsBusy == 0)   //如果此時endpoint 1 IN 沒有傳送資料給host
-					SendReport();	   //這時才能透過endpoint 1 IN 傳送report給host 
+				if(Ep2InIsBusy == 0)   //如果此時endpoint 2 IN 沒有傳送資料給host
+					SendNoteOnMsg();   //這時才能透過endpoint 2 IN 傳送Note On message給host 
 				while(pressKey != NOPRESS);	  //等到按鍵鬆開才會跳出loop
-				SendReport();                 //如果按鍵鬆開後要送出ㄧ個report，告知host已經沒有按鍵按下去了
-			}		
+				SendNoteOnMsg();              //如果按鍵鬆開後要送出ㄧ個Note On message，告知host已經沒有按鍵按下去了
+			}
 		}
 		
 		

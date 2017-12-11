@@ -45,10 +45,10 @@ void SendReport(void)
 {
 	unsigned char Buf[9] = {0,0,0,0,0,0,0,0,0};
 	unsigned char i=3;
-	Ep1InIsBusy = 1;
 	
 	if(function == 0) //如果選擇鍵盤功能
 	{
+		Ep1InIsBusy = 1;
 		Buf[0] = 1;   //鍵盤的report ID為1		
 
 		//Buf[1]有8個bit
@@ -135,6 +135,7 @@ void SendReport(void)
 	}
 	else  //如果選擇滑鼠功能時
 	{
+		Ep2InIsBusy = 1;
 		Buf[0] = 1;               //滑鼠的report ID為1
 
 		if(KEY & 0x01)			  //如果鍵盤0被按下，則代表按下滑鼠右鍵
@@ -156,13 +157,13 @@ void SendReport(void)
 		else if((KEY>>7) & 0X01)  //如果鍵盤7被按下，則代表滑鼠左移 (即X軸為負值)
 			Buf[2] = -1;
 	
-		if((KEY>>9) & 0X01)        //如果鍵盤9被按下，則代表滑鼠上移 (即Y軸為正值)
+		if((KEY>>9) & 0X01)        //如果鍵盤9被按下，則代表滑鼠下移 (即Y軸為正值)
 			Buf[3] = 1;
-		else if((KEY>>10) & 0X01)  //如果鍵盤10被按下，則代表滑鼠上移 (即Y軸為正值)
+		else if((KEY>>10) & 0X01)  //如果鍵盤10被按下，則代表滑鼠下移 (即Y軸為正值)
 			Buf[3] = 1;
-		else if((KEY>>13) & 0X01)  //如果鍵盤13被按下，則代表滑鼠下移 (即Y軸為負值)
+		else if((KEY>>13) & 0X01)  //如果鍵盤13被按下，則代表滑鼠上移 (即Y軸為負值)
 			Buf[3] = -1;
-		else if((KEY>>14) & 0X01)  //如果鍵盤14被按下，則代表滑鼠下移 (即Y軸為負值)
+		else if((KEY>>14) & 0X01)  //如果鍵盤14被按下，則代表滑鼠上移 (即Y軸為負值)
 			Buf[3] = -1;
 	
 		if((KEY>>12) & 0X01)       //如果鍵盤12被按下，則代表滾輪上滾 (即滾輪值為正值)
@@ -215,38 +216,39 @@ void main()
 	while(1)
 	{	
 		KeyCanChange = 1;	      //准許按鍵能被按下
-		if(pressKey == KEY2)		   //如果按鍵2被按下時，代表切換功能(鍵盤/滑鼠)
-		{
-			function = !function;
-			while(pressKey != NOPRESS);//等到按鍵鬆開時才跳出loop
-			Prints("選擇");
-			if(function == 0)
-				Prints("鍵盤 function\n");
-			else
-				Prints("滑鼠 function\n");
-		}
-		else if(pressKey != NOPRESS)   //如果有按鍵被按下時
+		if(pressKey != NOPRESS)   //如果有按鍵被按下時
 		{ 	
-			if(function == 0)		   //如果使用鍵盤功能時
+			if(pressKey == KEY2)		   //如果按鍵2被按下時，代表切換功能(鍵盤/滑鼠)
 			{
-				if(ConfigValue)			      //如果已成功設定configuration
+				function = !function;
+				while(pressKey != NOPRESS);//等到按鍵鬆開時才跳出loop
+				Prints("選擇");
+				if(function == 0)
+					Prints("鍵盤 function\n");
+				else
+					Prints("滑鼠 function\n");
+			}
+			else						   //如果是其他按鍵被按下
+			{
+				if(function == 0)		   //如果使用鍵盤功能時
 				{
-					if(Ep1InIsBusy == 0)      //如果此時endpoint 1 IN 沒有傳送資料給host
-						SendReport();	      //這時才能透過endpoint 1 IN 傳送report給host 
+					if(ConfigValue)			      //如果已成功設定configuration
+					{
+						if(Ep1InIsBusy == 0)      //如果此時endpoint 1 IN 沒有傳送資料給host
+							SendReport();	      //這時才能透過endpoint 1 IN 傳送report給host 
+						while(pressKey != NOPRESS);	  //等到按鍵鬆開才會跳出loop
+						SendReport();                 //如果按鍵鬆開後要送出ㄧ個report，告知host已經沒有按鍵按下去了
+					}			
 				}
-					
-				while(pressKey != NOPRESS);	  //等到按鍵鬆開才會跳出loop
-				SendReport();                 //如果按鍵鬆開後要送出ㄧ個report，告知host已經沒有按鍵按下去了		
-			}
-			else					   //如果使用滑鼠功能時
-			{
-				if(ConfigValue)			      //如果已成功設定configuration
+				else					   //如果使用滑鼠功能時
 				{
-					if(Ep1InIsBusy == 0)      //如果此時endpoint 1 IN 沒有傳送資料給host
-						SendReport();	      //這時才能透過endpoint 1 IN 傳送report給host 
-				}	
+					if(ConfigValue)			      //如果已成功設定configuration
+					{
+						if(Ep2InIsBusy == 0)      //如果此時endpoint 2 IN 沒有傳送資料給host
+							SendReport();	      //這時才能透過endpoint 2 IN 傳送report給host 
+					}	
+				}
 			}
-
 		}
 		
 		

@@ -315,24 +315,6 @@ code unsigned char ReportDescriptor[]=
 	0xc0 // END_COLLECTION
 
 };
-//通過上面的report descriptor的定義，我們知道返回的input report具有8 byte。
-//第一個byte的8個bit用來表示特殊鍵是否按下（例如Shift、Alt等鍵）。
-//第二個byte為保留值，值為constant 0。第三到第八個byte是一個普通鍵鍵值的array 
-//當沒有鍵按下時，全部6個byte值都為0。當只有一個普通鍵按下時，
-//這六個byte中的第一個byte值即為該按鍵的鍵值（具體的鍵值請看HID的usage table文檔）
-//當有多個普通鍵同時按下時，則同時返回這些鍵的鍵值。
-//如果按下的鍵太多，則這六個byte都為0xFF（不能返回0x00，這樣會讓作業系統認為所有鍵都已經釋放）。
-//至於鍵值在array中的先後順序是無所謂的
-//作業系統會負責檢查是否有新鍵按下。我們應該在interrupt endpoint 1中按照上面的格式返回實際的鍵盤數據。
-//
-//另外，report中還定義了一個byte的out report
-//是用來控制LED情況的。只使用了低7 bit，高1 bit是保留值0。
-//當某bit的值為1時，則表示對應的LED要點亮。作業系統會負責同步各個
-//鍵盤之間的LED，例如你有兩塊鍵盤，一塊的數字鍵盤燈亮時，另一塊
-//也會跟著亮。鍵盤本身不需要判斷各種LED應該何時亮，它只是等待主機
-//發送report給它，然後根據report值來點亮相應的LED。我們在endpoint 1 OUT interrupt
-//中讀出這1 byte的outpur report，然後對它取反（因為學習板上的LED是低電平時
-//亮），直接發送到LED上。這樣main函數中按鍵點亮LED的代碼就不需要了。
 ///////////////////////////report descriptor完畢////////////////////////////
 
 
